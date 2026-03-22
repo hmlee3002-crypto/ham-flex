@@ -332,8 +332,6 @@ def render_quiz_page():
     api_key: str = st.session_state.api_key
     comps = get_components(api_key)
 
-    st.title("문제 풀기")
-
     # 난이도 자동 조절 체크
     _maybe_adjust_difficulty(session, comps)
 
@@ -532,8 +530,6 @@ def render_analysis_page():
     api_key: str = st.session_state.api_key
     comps = get_components(api_key)
 
-    st.title("실력 분석")
-
     if not session.grade_results:
         st.warning("분석할 데이터가 없습니다. 문제를 먼저 풀어주세요.")
         if st.button("문제 풀러 가기", key="analysis_to_quiz"):
@@ -645,8 +641,6 @@ def render_report_page():
     api_key: str = st.session_state.api_key
     comps = get_components(api_key)
 
-    st.title("학습 리포트")
-
     if not session.grade_results:
         st.warning("리포트를 생성할 데이터가 없습니다. 문제를 먼저 풀어주세요.")
         if st.button("문제 풀러 가기", key="report_to_quiz"):
@@ -755,6 +749,14 @@ def main():
 
     session: Session = st.session_state.session
     page = st.session_state.get("active_tab", "quiz")
+
+    # 앱 타이틀
+    st.markdown("""
+    <div style="padding: 24px 0 8px 0;">
+        <div style="font-size:12px; color:#53cfca; font-weight:600; letter-spacing:1px; text-transform:uppercase;">FLEX AI</div>
+        <div style="font-size:22px; font-weight:800; color:#1a1a1a; margin-top:2px;">학습 에이전트</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # 상단 상태 바
     total = len(session.grade_results)
