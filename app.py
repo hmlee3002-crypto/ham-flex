@@ -196,7 +196,7 @@ def _clear_session():
     if "api_key" in st.session_state:
         comps = get_components(st.session_state.api_key)
         comps["session_store"].clear()
-    for key in ["session", "current_question", "grade_result", "page"]:
+    for key in ["session", "current_question", "grade_result", "page", "active_tab", "recommender"]:
         st.session_state.pop(key, None)
     st.sidebar.success("세션이 초기화되었습니다.")
     st.rerun()
@@ -231,7 +231,7 @@ def render_quiz_page():
         return
 
     # 문제 표시
-    st.markdown(f"**유형:** {SUBTYPE_NAMES[question.subtype]} | **난이도:** {question.difficulty.value}")
+    st.markdown(f"**유형:** {SUBTYPE_NAMES.get(question.subtype, str(question.subtype))} | **난이도:** {question.difficulty.value if hasattr(question.difficulty, 'value') else question.difficulty}")
     st.markdown("---")
     st.subheader("📖 지문")
     st.markdown(f"> {question.passage}")
