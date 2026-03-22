@@ -261,16 +261,18 @@ def render_home(api_key: str):
         ("3", "예상 점수", "풀이 데이터 기반 점수 예측"),
         ("4", "난이도 조절", "정답률에 따라 자동으로 조정"),
     ]
-    col_a, col_b = st.columns(2)
-    for i, (num, title, desc) in enumerate(features):
-        col = col_a if i % 2 == 0 else col_b
-        with col:
-            st.markdown(f"""
-            <div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:10px;
-                        border-left:3px solid #53cfca;box-shadow:0 1px 6px rgba(83,207,202,0.08);">
-                <div style="font-size:13px;font-weight:700;color:#1a1a1a;">{title}</div>
-                <div style="font-size:11px;color:#bbb;margin-top:3px;line-height:1.5;">{desc}</div>
-            </div>""", unsafe_allow_html=True)
+    for num, title, desc in features:
+        st.markdown(f"""
+        <div style="background:#fff;border-radius:12px;padding:10px 14px;margin-bottom:8px;
+                    box-shadow:0 1px 6px rgba(83,207,202,0.08);display:flex;gap:12px;align-items:center;">
+            <div style="min-width:22px;height:22px;background:linear-gradient(135deg,#53cfca,#38b2ac);
+                        border-radius:50%;display:flex;align-items:center;justify-content:center;
+                        font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">{num}</div>
+            <div>
+                <span style="font-size:13px;font-weight:700;color:#1a1a1a;">{title}</span>
+                <span style="font-size:12px;color:#bbb;margin-left:8px;">{desc}</span>
+            </div>
+        </div>""", unsafe_allow_html=True)
 
 
 def _start_new_session(api_key: str, target_score: int, current_score: int):
