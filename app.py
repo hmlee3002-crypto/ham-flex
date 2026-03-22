@@ -572,9 +572,14 @@ def render_analysis_page():
 
     # 유형별 정답률 카드
     sorted_subtypes = sorted(analysis.subtype_accuracies.items(), key=lambda x: x[1])
-    rows_html = ""
+
+    st.markdown("""
+    <div class="card">
+        <div class="card-title">유형별 정답률</div>
+        <div class="card-subtitle">정답률 60% 미만은 취약 영역으로 분류됩니다</div>
+    </div>""", unsafe_allow_html=True)
+
     for subtype, acc in sorted_subtypes:
-        # enum 강제 변환
         if isinstance(subtype, str):
             try:
                 from flex_agent.models.data_models import ReadingSubtype as RS
@@ -585,24 +590,29 @@ def render_analysis_page():
         pct = int(acc * 100)
         is_weak = subtype in analysis.weak_subtypes
         bar_class = "bar-fill-weak" if is_weak else "bar-fill"
-        score_color = "#ff6b6b" if is_weak else "#4d9fff"
-        rows_html += f"""
-        <div class="subtype-row">
-            <div class="subtype-label">{name}</div>
-            <div class="subtype-score" style="color:{score_color}">{pct}%{"&nbsp;&nbsp;⚠️ 취약" if is_weak else ""}</div>
-            <div class="bar-bg"><div class="{bar_class}" style="width:{pct}%"></div></div>
-        </div>"""
-
-    st.markdown(f"""
-    <div class="card">
-        <div class="card-title">유형별 정답률</div>
-        <div class="card-subtitle">정답률 60% 미만은 취약 영역으로 분류됩니다</div>
-        {rows_html}
-    </div>""", unsafe_allow_html=True)
+        score_color = "#ff6b6b" if is_weak else "#53cfca"
+        weak_badge = "&nbsp;&nbsp;취약" if is_weak else ""
+        st.markdown(f"""
+        <div style="background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:8px;
+                    box-shadow:0 1px 6px rgba(83,207,202,0.08);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-size:14px;font-weight:500;color:#444;">{name}</span>
+                <span style="font-size:14px;font-weight:700;color:{score_color};">{pct}%{weak_badge}</span>
+            </div>
+            <div style="background:#e8f8f7;border-radius:99px;height:8px;">
+                <div style="background:{'linear-gradient(90deg,#ff8a80,#ff5252)' if is_weak else 'linear-gradient(90deg,#53cfca,#38b2ac)'};
+                            border-radius:99px;height:8px;width:{pct}%;"></div>
+            </div>
+        </div>""", unsafe_allow_html=True)
 
     # 취약 개념 카드
     if analysis.weak_subtypes:
-        weak_rows_html = ""
+        st.markdown("""
+        <div class="card">
+            <div class="card-title">취약한 개념</div>
+            <div class="card-subtitle">집중적으로 연습이 필요한 유형입니다</div>
+        </div>""", unsafe_allow_html=True)
+
         for subtype in analysis.weak_subtypes:
             acc = analysis.subtype_accuracies.get(subtype, 0)
             if isinstance(subtype, str):
@@ -613,19 +623,18 @@ def render_analysis_page():
                     pass
             name = SUBTYPE_NAMES.get(subtype, subtype if isinstance(subtype, str) else subtype.value)
             pct = int(acc * 100)
-            weak_rows_html += f"""
-            <div class="subtype-row">
-                <div class="subtype-label">{name}</div>
-                <div class="subtype-score" style="color:#ff6b6b">{pct}%</div>
-                <div class="bar-bg"><div class="bar-fill-weak" style="width:{pct}%"></div></div>
-            </div>"""
-
-        st.markdown(f"""
-        <div class="card">
-            <div class="card-title">취약한 개념</div>
-            <div class="card-subtitle">집중적으로 연습이 필요한 유형입니다</div>
-            {weak_rows_html}
-        </div>""", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div style="background:#fff0f0;border-radius:12px;padding:12px 16px;margin-bottom:8px;
+                        border-left:4px solid #ff5252;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <span style="font-size:14px;font-weight:500;color:#444;">{name}</span>
+                    <span style="font-size:14px;font-weight:700;color:#ff6b6b;">{pct}%</span>
+                </div>
+                <div style="background:#ffe0e0;border-radius:99px;height:8px;">
+                    <div style="background:linear-gradient(90deg,#ff8a80,#ff5252);
+                                border-radius:99px;height:8px;width:{pct}%;"></div>
+                </div>
+            </div>""", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("문제 풀러 가기", use_container_width=True, key="analysis_go_quiz"):
@@ -691,7 +700,12 @@ def render_report_page():
 
     # 유형별 정답률
     sorted_subtypes = sorted(report.subtype_accuracies.items(), key=lambda x: x[1])
-    rows_html = ""
+
+    st.markdown("""
+    <div class="card">
+        <div class="card-title">유형별 정답률</div>
+    </div>""", unsafe_allow_html=True)
+
     for subtype, acc in sorted_subtypes:
         if isinstance(subtype, str):
             try:
@@ -702,33 +716,33 @@ def render_report_page():
         name = SUBTYPE_NAMES.get(subtype, subtype if isinstance(subtype, str) else subtype.value)
         pct = int(acc * 100)
         is_weak = subtype in report.weak_subtypes
-        bar_class = "bar-fill-weak" if is_weak else "bar-fill"
-        score_color = "#ff6b6b" if is_weak else "#4d9fff"
-        rows_html += f"""
-        <div class="subtype-row">
-            <div class="subtype-label">{name}</div>
-            <div class="subtype-score" style="color:{score_color}">{pct}%</div>
-            <div class="bar-bg"><div class="{bar_class}" style="width:{pct}%"></div></div>
-        </div>"""
-
-    st.markdown(f"""
-    <div class="card">
-        <div class="card-title">유형별 정답률</div>
-        {rows_html}
-    </div>""", unsafe_allow_html=True)
+        score_color = "#ff6b6b" if is_weak else "#53cfca"
+        st.markdown(f"""
+        <div style="background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:8px;
+                    box-shadow:0 1px 6px rgba(83,207,202,0.08);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-size:14px;font-weight:500;color:#444;">{name}</span>
+                <span style="font-size:14px;font-weight:700;color:{score_color};">{pct}%</span>
+            </div>
+            <div style="background:#e8f8f7;border-radius:99px;height:8px;">
+                <div style="background:{'linear-gradient(90deg,#ff8a80,#ff5252)' if is_weak else 'linear-gradient(90deg,#53cfca,#38b2ac)'};
+                            border-radius:99px;height:8px;width:{pct}%;"></div>
+            </div>
+        </div>""", unsafe_allow_html=True)
 
     # 학습 방향
     if report.study_directions:
-        directions_html = "".join(
-            f'<div style="color:#555;font-size:14px;padding:8px 0;border-bottom:1px solid #eee">• {d}</div>'
-            for d in report.study_directions
-        )
-        st.markdown(f"""
+        st.markdown("""
         <div class="card">
             <div class="card-title">학습 방향</div>
             <div class="card-subtitle">취약 영역 기반 추천 학습 방향입니다</div>
-            {directions_html}
         </div>""", unsafe_allow_html=True)
+        for d in report.study_directions:
+            st.markdown(f"""
+            <div style="color:#555;font-size:14px;padding:10px 16px;margin-bottom:6px;
+                        background:#fff;border-radius:10px;border-left:3px solid #53cfca;">
+                {d}
+            </div>""", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("계속 학습하기", use_container_width=True, key="report_go_quiz"):
