@@ -152,63 +152,75 @@ def get_recommender() -> Recommender:
 
 
 # ─────────────────────────────────────────────
-# 사이드바: API 키 및 세션 설정
+# API 키 로드
 # ─────────────────────────────────────────────
-def render_sidebar():
-    with st.sidebar:
-        st.title("🎓 FLEX AI 학습 에이전트")
-        st.markdown("---")
+def get_api_key() -> str:
+    try:
+        return st.secrets["GROQ_API_KEY"]
+    except (KeyError, FileNotFoundError):
+        st.error("⚠️ GROQ_API_KEY가 설정되지 않았습니다. Streamlit Cloud Secrets를 확인해 주세요.")
+        st.stop()
+        return ""
 
-        # Secrets에서 API 키 자동 로드
-        try:
-            api_key = st.secrets["GROQ_API_KEY"]
-        except (KeyError, FileNotFoundError):
-            api_key = ""
-            st.error("⚠️ GROQ_API_KEY가 설정되지 않았습니다. Streamlit Cloud Secrets를 확인해 주세요.")
-            st.stop()
 
-        st.markdown("---")
-        st.subheader("📋 세션 설정")
+# ─────────────────────────────────────────────
+# 홈 화면
+# ─────────────────────────────────────────────
+def render_home(api_key: str):
+    _, col, _ = st.columns([1, 2, 1])
+    with col:
+        st.markdown("""
+        <div style="text-align:center; padding: 32px 0 16px 0;">
+            <div style="font-size:48px">🎓</div>
+            <div style="font-size:28px; font-weight:800; margin-top:8px;">FLEX AI 학습 에이전트</div>
+            <div style="font-size:15px; color:#888; margin-top:8px;">FLEX 중국어 독해 영역을 AI로 대비하세요</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
 
         target_score = st.number_input(
-            "목표 점수 (0~600)",
+            "🎯 목표 점수 (0~600)",
             min_value=0, max_value=600, value=450, step=10,
-        )
-        current_score = st.number_input(
-            "현재 예상 점수 (0~600)",
-            min_value=0, max_value=600, value=300, step=10,
+            key="home_target",
         )
 
-        if st.button("🚀 새 세션 시작", use_container_width=True):
-            if not api_key:
-                st.error("API 키를 입력해 주세요.")
-            else:
+        difficulty_option = st.radio(
+            "📚 시작 난이도",
+            options=["쉬움 (0~350점)", "보통 (351~450점)", "어려움 (451~600점)"],
+            horizontal=True,
+            key="home_difficulty",
+        )
+        difficulty_map = {
+            "쉬움 (0~350점)": (Difficulty.EASY, 300),
+            "보통 (351~450점)": (Difficulty.MEDIUM, 400),
+            "어려움 (451~600점)": (Difficulty.HARD, 500),
+        }
+        selected_difficulty, current_score = difficulty_map[difficulty_option]
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        col_start, col_load = st.columns(2)
+        with col_start:
+            if st.button("🚀 새 세션 시작", use_container_width=True, type="primary", key="home_start"):
                 _start_new_session(api_key, target_score, current_score)
-
-        # 기존 세션 불러오기
-        if st.button("📂 기존 세션 불러오기", use_container_width=True):
-            if not api_key:
-                st.error("API 키를 입력해 주세요.")
-            else:
+        with col_load:
+            if st.button("📂 이어하기", use_container_width=True, key="home_load"):
                 _load_existing_session(api_key)
 
-        # 세션 초기화
-        if st.button("🗑️ 세션 초기화", use_container_width=True):
-            _clear_session()
+        st.markdown("<br>", unsafe_allow_html=True)
 
-        # 현재 세션 상태 표시
-        if "session" in st.session_state and st.session_state.session:
-            session: Session = st.session_state.session
-            st.markdown("---")
-            st.subheader("📊 현재 세션")
-            st.metric("목표 점수", f"{session.target_score}점")
-            st.metric("현재 난이도", DIFFICULTY_NAMES.get(session.current_difficulty, session.current_difficulty.value))
-            st.metric("풀이한 문제", f"{len(session.grade_results)}개")
-            if session.grade_results:
-                correct = sum(r.is_correct for r in session.grade_results)
-                st.metric("정답률", f"{correct / len(session.grade_results):.0%}")
-
-        return api_key
+        st.markdown("""
+        <div style="background:#1a1a1a; border-radius:12px; padding:20px 24px;">
+            <div style="font-size:15px; font-weight:700; color:#fff; margin-bottom:14px;">주요 기능</div>
+            <div style="color:#ccc; font-size:14px; line-height:2.2;">
+                🤖 &nbsp;FLEX 스타일 문제 자동 생성<br>
+                📊 &nbsp;오답 분석 및 취약 영역 확인<br>
+                📈 &nbsp;예상 점수 확인 및 학습 리포트<br>
+                🔄 &nbsp;난이도 자동 조절 기반 학습
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 def _start_new_session(api_key: str, target_score: int, current_score: int):
@@ -217,7 +229,7 @@ def _start_new_session(api_key: str, target_score: int, current_score: int):
         validate_score(target_score)
         validate_score(current_score)
     except InvalidScoreError as e:
-        st.sidebar.error(str(e))
+        st.error(str(e))
         return
 
     comps = get_components(api_key)
@@ -234,16 +246,12 @@ def _start_new_session(api_key: str, target_score: int, current_score: int):
     )
     session_store.save(session)
 
-    # st.session_state 초기화
     st.session_state.session = session
     st.session_state.api_key = api_key
     st.session_state.current_question = None
     st.session_state.grade_result = None
-    st.session_state.page = "quiz"
-    st.session_state.recommender = Recommender()  # 새 세션마다 초기화
-    st.sidebar.success(
-        f"세션 시작! 초기 난이도: {DIFFICULTY_NAMES.get(difficulty, difficulty.value)} ({DIFFICULTY_RANGES[difficulty]})"
-    )
+    st.session_state.active_tab = "quiz"
+    st.session_state.recommender = Recommender()
     st.rerun()
 
 
@@ -257,13 +265,10 @@ def _load_existing_session(api_key: str):
         st.session_state.api_key = api_key
         st.session_state.current_question = None
         st.session_state.grade_result = None
-        st.session_state.page = "quiz"
-        st.sidebar.success(
-            f"세션 불러오기 완료! (풀이한 문제: {len(session.grade_results)}개)"
-        )
+        st.session_state.active_tab = "quiz"
         st.rerun()
     else:
-        st.sidebar.warning("저장된 세션이 없습니다. 새 세션을 시작해 주세요.")
+        st.warning("저장된 세션이 없습니다. 새 세션을 시작해 주세요.")
 
 
 def _clear_session():
@@ -273,7 +278,6 @@ def _clear_session():
         comps["session_store"].clear()
     for key in ["session", "current_question", "grade_result", "page", "active_tab", "recommender"]:
         st.session_state.pop(key, None)
-    st.sidebar.success("세션이 초기화되었습니다.")
     st.rerun()
 
 
@@ -674,39 +678,38 @@ def render_report_page():
 # 메인 라우터
 # ─────────────────────────────────────────────
 def main():
-    api_key = render_sidebar()
+    api_key = get_api_key()
 
-    # 세션이 없으면 시작 화면
+    # 세션이 없으면 홈 화면
     if "session" not in st.session_state or not st.session_state.session:
-        st.title("🎓 FLEX AI 학습 에이전트")
-        st.markdown("""
-        FLEX 중국어 시험 독해 영역을 AI로 대비하세요.
-
-        **시작 방법:**
-        1. 왼쪽 사이드바에 OpenAI API 키를 입력하세요.
-        2. 목표 점수와 현재 예상 점수를 설정하세요.
-        3. '새 세션 시작' 버튼을 누르세요.
-
-        **주요 기능:**
-        - 🤖 AI 기반 FLEX 스타일 문제 자동 생성
-        - 📊 세부 유형별 오답 분석
-        - 📈 예상 점수 예측 및 학습 리포트
-        - 🔄 정답률 기반 난이도 자동 조절
-        """)
+        render_home(api_key)
         return
 
-    # 페이지 라우팅
+    session: Session = st.session_state.session
     page = st.session_state.get("active_tab", "quiz")
 
-    # 상단 네비게이션 버튼
-    col1, col2, col3 = st.columns(3)
+    # 상단 상태 바
+    total = len(session.grade_results)
+    predicted = session.predicted_score or 0
+    difficulty_label = DIFFICULTY_NAMES.get(session.current_difficulty, "")
+    st.markdown(f"""
+    <div style="display:flex; gap:16px; align-items:center; padding:8px 0 16px 0; flex-wrap:wrap;">
+        <span style="color:#aaa; font-size:13px;">🎯 목표 <b style="color:#fff">{session.target_score}점</b></span>
+        <span style="color:#aaa; font-size:13px;">📈 예상 <b style="color:#4d9fff">{predicted:.0f}점</b></span>
+        <span style="color:#aaa; font-size:13px;">📚 난이도 <b style="color:#fff">{difficulty_label}</b></span>
+        <span style="color:#aaa; font-size:13px;">✏️ 풀이 <b style="color:#fff">{total}문제</b></span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 네비게이션 버튼
+    col1, col2, col3, col4 = st.columns([3, 3, 3, 2])
     with col1:
         if st.button("📝 문제 풀기", use_container_width=True, key="nav_quiz",
                      type="primary" if page == "quiz" else "secondary"):
             st.session_state.active_tab = "quiz"
             st.rerun()
     with col2:
-        if st.button("📊 오답 분석", use_container_width=True, key="nav_analysis",
+        if st.button("📊 실력 분석", use_container_width=True, key="nav_analysis",
                      type="primary" if page == "analysis" else "secondary"):
             st.session_state.active_tab = "analysis"
             st.rerun()
@@ -715,6 +718,9 @@ def main():
                      type="primary" if page == "report" else "secondary"):
             st.session_state.active_tab = "report"
             st.rerun()
+    with col4:
+        if st.button("🏠 홈", use_container_width=True, key="nav_home"):
+            _clear_session()
 
     st.markdown("---")
 
