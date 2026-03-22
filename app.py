@@ -784,11 +784,25 @@ def main():
     # 상단 상태 바
     total = len(session.grade_results)
     predicted = session.predicted_score or 0
-    difficulty_label = DIFFICULTY_NAMES.get(session.current_difficulty, "")
+    difficulty = session.current_difficulty
+    if isinstance(difficulty, str):
+        try:
+            difficulty = Difficulty(difficulty)
+        except ValueError:
+            pass
+    difficulty_label = DIFFICULTY_NAMES.get(difficulty, difficulty if isinstance(difficulty, str) else difficulty.value)
+
+    predicted_html = (
+        f'<div class="status-item-value mint">{predicted:.0f}점</div>'
+        f'<div style="font-size:11px;color:#aaa;margin-top:1px;">예측중</div>'
+        if predicted == 0 else
+        f'<div class="status-item-value mint">{predicted:.0f}점</div>'
+    )
+
     st.markdown(f"""
     <div class="status-bar">
         <div><div class="status-item-label">목표 점수</div><div class="status-item-value">{session.target_score}점</div></div>
-        <div><div class="status-item-label">예상 점수</div><div class="status-item-value mint">{predicted:.0f}점</div></div>
+        <div><div class="status-item-label">예상 점수</div>{predicted_html}</div>
         <div><div class="status-item-label">난이도</div><div class="status-item-value">{difficulty_label}</div></div>
         <div><div class="status-item-label">풀이 문제</div><div class="status-item-value">{total}문제</div></div>
     </div>
