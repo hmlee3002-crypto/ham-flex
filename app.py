@@ -144,57 +144,60 @@ body, .stMarkdown, p, div { font-family: 'Inter', 'Apple SD Gothic Neo', sans-se
 /* ── 다크모드 ── */
 @media (prefers-color-scheme: dark) {
     .stApp {
-        background: linear-gradient(160deg, #0f2027 0%, #1a2e2d 40%, #1a1f2e 100%) !important;
+        background: linear-gradient(160deg, #1e3a38 0%, #243d3b 40%, #1e2a3a 100%) !important;
     }
     .card {
-        background: #1e2d2c !important;
-        box-shadow: 0 2px 16px rgba(0,0,0,0.3) !important;
+        background: #2a3f3e !important;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.2) !important;
     }
-    .card-title { color: #e8e8e8 !important; }
-    .card-subtitle { color: #7a9e9c !important; }
+    .card-title { color: #ffffff !important; }
+    .card-subtitle { color: #8ab8b5 !important; }
     .stat-box {
-        background: #1e2d2c !important;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.3) !important;
+        background: #2a3f3e !important;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.2) !important;
     }
-    .stat-label { color: #7a9e9c !important; }
+    .stat-label { color: #8ab8b5 !important; }
     .status-bar {
-        background: #1e2d2c !important;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.3) !important;
+        background: #2a3f3e !important;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.2) !important;
     }
-    .status-item-label { color: #7a9e9c !important; }
-    .status-item-value { color: #e8e8e8 !important; }
-    .bar-bg { background-color: #2a3f3e !important; }
-    .subtype-label { color: #c0d0cf !important; }
-    /* 인라인 div 카드들 배경/텍스트 */
-    div[style*="background:#fff"],
-    div[style*="background: #fff"] {
-        background: #1e2d2c !important;
-    }
-    div[style*="background:#f9f9f9"] {
-        background: #243332 !important;
-    }
-    div[style*="background:#fff0f0"] {
-        background: #2d1a1a !important;
-    }
-    div[style*="background:#e6faf8"] {
-        background: #1a2e2c !important;
-    }
+    .status-item-label { color: #8ab8b5 !important; }
+    .status-item-value { color: #ffffff !important; }
+    .bar-bg { background-color: #3a5250 !important; }
+    .subtype-label { color: #d0e0df !important; }
+    /* 제목 텍스트 */
     div[style*="color:#1a1a1a"],
-    span[style*="color:#1a1a1a"] { color: #e8e8e8 !important; }
+    span[style*="color:#1a1a1a"] { color: #ffffff !important; }
     div[style*="color:#444"],
-    span[style*="color:#444"] { color: #c0c0c0 !important; }
+    span[style*="color:#444"] { color: #d0d0d0 !important; }
     div[style*="color:#555"],
-    span[style*="color:#555"] { color: #b0b0b0 !important; }
+    span[style*="color:#555"] { color: #c0c0c0 !important; }
     div[style*="color:#666"],
-    span[style*="color:#666"] { color: #a0a0a0 !important; }
+    span[style*="color:#666"] { color: #b0b0b0 !important; }
     div[style*="color:#aaa"],
-    span[style*="color:#aaa"] { color: #7a9e9c !important; }
+    span[style*="color:#aaa"] { color: #8ab8b5 !important; }
     div[style*="color:#bbb"],
-    span[style*="color:#bbb"] { color: #7a9e9c !important; }
+    span[style*="color:#bbb"] { color: #8ab8b5 !important; }
     div[style*="color:#888"],
-    span[style*="color:#888"] { color: #8ab0ae !important; }
+    span[style*="color:#888"] { color: #9ac8c5 !important; }
     div[style*="color:#999"],
-    span[style*="color:#999"] { color: #8ab0ae !important; }
+    span[style*="color:#999"] { color: #9ac8c5 !important; }
+    /* 인라인 카드 배경 */
+    div[style*="background:#fff"],
+    div[style*="background: #fff"] { background: #2a3f3e !important; }
+    div[style*="background:#f9f9f9"] { background: #2f4644 !important; }
+    div[style*="background:#fff0f0"] { background: #3d2525 !important; }
+    div[style*="background:#e6faf8"] { background: #1e3532 !important; }
+    /* secondary 버튼 (이어하기 등) */
+    .stButton > button[kind="secondary"] {
+        background: #3a5250 !important;
+        color: #e0f0ef !important;
+        border: 1px solid #53cfca !important;
+    }
+    /* 홈 타이틀 */
+    div[style*="font-size:32px"] { color: #ffffff !important; }
+    div[style*="font-size:22px"] { color: #ffffff !important; }
+    div[style*="font-size:12px"][style*="color:#53cfca"] { color: #53cfca !important; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -273,7 +276,7 @@ def render_home(api_key: str):
     st.markdown("""
     <div style="padding: 40px 0 8px 0;">
         <div style="font-size:13px; color:#53cfca; font-weight:600; letter-spacing:1px; text-transform:uppercase;">FLEX AI</div>
-        <div style="font-size:32px; font-weight:800; color:#1a1a1a; margin-top:4px; line-height:1.2;">학습 에이전트</div>
+        <div style="font-size:32px; font-weight:800; color:#1a1a1a; margin-top:4px; line-height:1.2; --dark-color:#fff;">학습 에이전트</div>
         <div style="font-size:15px; color:#888; margin-top:8px;">FLEX 중국어 독해 영역을 AI로 대비하세요</div>
     </div>
     """, unsafe_allow_html=True)
