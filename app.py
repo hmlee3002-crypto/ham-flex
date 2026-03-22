@@ -86,10 +86,10 @@ def render_sidebar():
 
         # Secrets에서 API 키 자동 로드
         try:
-            api_key = st.secrets["GEMINI_API_KEY"]
+            api_key = st.secrets["GROQ_API_KEY"]
         except (KeyError, FileNotFoundError):
             api_key = ""
-            st.error("⚠️ GEMINI_API_KEY가 설정되지 않았습니다. Streamlit Cloud Secrets를 확인해 주세요.")
+            st.error("⚠️ GROQ_API_KEY가 설정되지 않았습니다. Streamlit Cloud Secrets를 확인해 주세요.")
             st.stop()
 
         st.markdown("---")

@@ -1,7 +1,7 @@
 """
 FLEX AI 학습 에이전트 - LLM 클라이언트
 
-Google Gemini API 호출 래퍼. 지수 백오프 재시도 로직을 포함한다.
+Groq API 호출 래퍼. 지수 백오프 재시도 로직을 포함한다.
 """
 
 import logging
@@ -18,33 +18,32 @@ _RETRY_DELAYS = [1, 2, 4]
 
 class LLMClient:
     """
-    Google Gemini API 호출 래퍼.
+    Groq API 호출 래퍼.
 
     API 오류 발생 시 지수 백오프 방식으로 최대 3회 재시도하며,
     모두 실패하면 QuestionGenerationError를 발생시킨다.
     """
 
-    def __init__(self, api_key: str, model: str = "gemini-2.0-flash") -> None:
+    def __init__(self, api_key: str, model: str = "llama-3.3-70b-versatile") -> None:
         """
         Args:
-            api_key: Google AI Studio API 키
-            model: 사용할 모델명 (기본값: gemini-1.5-flash)
+            api_key: Groq API 키 (gsk_...)
+            model: 사용할 모델명 (기본값: llama-3.3-70b-versatile)
         """
         try:
-            import google.generativeai as genai
+            from groq import Groq
         except ImportError as e:
             raise ImportError(
-                "google-generativeai 패키지가 설치되어 있지 않습니다. "
-                "pip install google-generativeai"
+                "groq 패키지가 설치되어 있지 않습니다. pip install groq"
             ) from e
 
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        self._model = genai.GenerativeModel(model)
+        from groq import Groq
+        self._client = Groq(api_key=api_key)
+        self._model = model
 
     def complete(self, prompt: str) -> str:
         """
-        Gemini에 프롬프트를 전송하고 응답 텍스트를 반환한다.
+        Groq에 프롬프트를 전송하고 응답 텍스트를 반환한다.
 
         Args:
             prompt: 전달할 프롬프트 텍스트
@@ -59,12 +58,16 @@ class LLMClient:
 
         for attempt in range(_MAX_RETRIES):
             try:
-                response = self._model.generate_content(prompt)
-                return response.text or ""
+                response = self._client.chat.completions.create(
+                    model=self._model,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.7,
+                )
+                return response.choices[0].message.content or ""
             except Exception as e:
                 last_error = e
                 logger.warning(
-                    "Gemini 호출 실패 (시도 %d/%d): %s. %d초 후 재시도...",
+                    "Groq 호출 실패 (시도 %d/%d): %s. %d초 후 재시도...",
                     attempt + 1, _MAX_RETRIES, e, _RETRY_DELAYS[attempt],
                 )
                 if attempt + 1 < _MAX_RETRIES:
