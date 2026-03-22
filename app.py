@@ -50,14 +50,13 @@ DIFFICULTY_RANGES = {
 # ─────────────────────────────────────────────
 @st.cache_resource
 def get_components(api_key: str):
-    """API 키를 받아 컴포넌트를 초기화한다."""
+    """API 키를 받아 stateless 컴포넌트를 초기화한다. (Recommender 제외)"""
     session_store = SessionStore()
     llm_client = LLMClient(api_key=api_key)
     analyzer = Analyzer()
     score_predictor = ScorePredictor(session_store)
     grader = Grader(session_store)
     question_generator = QuestionGenerator(llm_client, session_store)
-    recommender = Recommender()
     report_generator = ReportGenerator(score_predictor, analyzer, session_store)
     return {
         "session_store": session_store,
@@ -66,9 +65,15 @@ def get_components(api_key: str):
         "score_predictor": score_predictor,
         "grader": grader,
         "question_generator": question_generator,
-        "recommender": recommender,
         "report_generator": report_generator,
     }
+
+
+def get_recommender() -> Recommender:
+    """Recommender는 session_state에서 관리한다 (상태 보존)."""
+    if "recommender" not in st.session_state:
+        st.session_state.recommender = Recommender()
+    return st.session_state.recommender
 
 
 # ─────────────────────────────────────────────
@@ -162,6 +167,7 @@ def _start_new_session(api_key: str, target_score: int, current_score: int):
     st.session_state.current_question = None
     st.session_state.grade_result = None
     st.session_state.page = "quiz"
+    st.session_state.recommender = Recommender()  # 새 세션마다 초기화
     st.sidebar.success(
         f"세션 시작! 초기 난이도: {difficulty.value} ({DIFFICULTY_RANGES[difficulty]})"
     )
@@ -259,13 +265,15 @@ def render_quiz_page():
 def _generate_question(session: Session, comps: dict):
     """다음 문제를 생성한다."""
     analyzer = comps["analyzer"]
-    recommender = comps["recommender"]
+    recommender = get_recommender()
     question_generator = comps["question_generator"]
 
     analysis = analyzer.analyze(session.grade_results)
     subtype = recommender.recommend_subtype(analysis, session.current_difficulty)
 
-    with st.spinner(f"문제 생성 중... (유형: {SUBTYPE_NAMES[subtype]}, 난이도: {session.current_difficulty.value})"):
+    subtype_label = SUBTYPE_NAMES.get(subtype, subtype.value)
+
+    with st.spinner(f"문제 생성 중... (유형: {subtype_label}, 난이도: {session.current_difficulty.value})"):
         try:
             question = question_generator.generate(subtype, session.current_difficulty)
             st.session_state.current_question = question
