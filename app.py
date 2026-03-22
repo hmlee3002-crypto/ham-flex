@@ -400,7 +400,7 @@ def render_analysis_page():
 
     # 정답률 바 차트
     subtype_data = {
-        SUBTYPE_NAMES[subtype]: round(acc * 100, 1)
+        SUBTYPE_NAMES.get(subtype, str(subtype)): round(acc * 100, 1)
         for subtype, acc in sorted(analysis.subtype_accuracies.items(), key=lambda x: x[1])
     }
     if subtype_data:
@@ -411,7 +411,7 @@ def render_analysis_page():
         st.subheader("⚠️ 취약 영역")
         for subtype in analysis.weak_subtypes:
             acc = analysis.subtype_accuracies.get(subtype, 0)
-            st.error(f"**{SUBTYPE_NAMES[subtype]}**: 정답률 {acc:.0%}")
+            st.error(f"**{SUBTYPE_NAMES.get(subtype, str(subtype))}**: 정답률 {acc:.0%}")
 
     if st.button("➡️ 문제 풀러 가기", use_container_width=True, key="analysis_go_quiz"):
         st.session_state.active_tab = "quiz"
@@ -459,7 +459,7 @@ def render_report_page():
     # 세부 유형별 정답률
     st.subheader("📈 세부 유형별 정답률")
     subtype_data = {
-        SUBTYPE_NAMES[subtype]: round(acc * 100, 1)
+        SUBTYPE_NAMES.get(subtype, str(subtype)): round(acc * 100, 1)
         for subtype, acc in sorted(report.subtype_accuracies.items(), key=lambda x: x[1], reverse=True)
     }
     if subtype_data:
@@ -471,7 +471,7 @@ def render_report_page():
             st.subheader("💪 강점 영역")
             for subtype in report.strong_subtypes:
                 acc = report.subtype_accuracies.get(subtype, 0)
-                st.success(f"**{SUBTYPE_NAMES[subtype]}**: {acc:.0%}")
+                st.success(f"**{SUBTYPE_NAMES.get(subtype, str(subtype))}**: {acc:.0%}")
         else:
             st.subheader("💪 강점 영역")
             st.info("아직 강점 영역이 없습니다.")
@@ -481,7 +481,7 @@ def render_report_page():
             st.subheader("⚠️ 취약 영역")
             for subtype in report.weak_subtypes:
                 acc = report.subtype_accuracies.get(subtype, 0)
-                st.error(f"**{SUBTYPE_NAMES[subtype]}**: {acc:.0%}")
+                st.error(f"**{SUBTYPE_NAMES.get(subtype, str(subtype))}**: {acc:.0%}")
         else:
             st.subheader("⚠️ 취약 영역")
             st.success("취약 영역이 없습니다. 훌륭해요!")

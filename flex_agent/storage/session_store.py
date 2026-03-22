@@ -75,7 +75,20 @@ class SessionStore:
         try:
             with open(self._file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            return Session.from_dict(data)
+            session = Session.from_dict(data)
+            # subtype/difficulty가 문자열로 남아있는 경우 강제 변환
+            from flex_agent.models.data_models import Difficulty, ReadingSubtype
+            for r in session.grade_results:
+                if isinstance(r.subtype, str):
+                    r.subtype = ReadingSubtype(r.subtype)
+                if isinstance(r.difficulty, str):
+                    r.difficulty = Difficulty(r.difficulty)
+            for q in session.questions:
+                if isinstance(q.subtype, str):
+                    q.subtype = ReadingSubtype(q.subtype)
+                if isinstance(q.difficulty, str):
+                    q.difficulty = Difficulty(q.difficulty)
+            return session
 
         except (json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
             # 파싱 실패 시 오류 기록 후 None 반환
