@@ -24,7 +24,7 @@ class LLMClient:
     모두 실패하면 QuestionGenerationError를 발생시킨다.
     """
 
-    def __init__(self, api_key: str, model: str = "gemini-1.5-flash") -> None:
+    def __init__(self, api_key: str, model: str = "gemini-2.0-flash") -> None:
         """
         Args:
             api_key: Google AI Studio API 키
