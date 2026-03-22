@@ -39,6 +39,12 @@ SUBTYPE_NAMES = {
     ReadingSubtype.ACADEMIC: "학술 지문",
 }
 
+DIFFICULTY_NAMES = {
+    Difficulty.EASY: "쉬움",
+    Difficulty.MEDIUM: "보통",
+    Difficulty.HARD: "어려움",
+}
+
 DIFFICULTY_RANGES = {
     Difficulty.EASY: "0~350점",
     Difficulty.MEDIUM: "351~450점",
@@ -127,7 +133,7 @@ def render_sidebar():
             st.markdown("---")
             st.subheader("📊 현재 세션")
             st.metric("목표 점수", f"{session.target_score}점")
-            st.metric("현재 난이도", session.current_difficulty.value)
+            st.metric("현재 난이도", DIFFICULTY_NAMES.get(session.current_difficulty, session.current_difficulty.value))
             st.metric("풀이한 문제", f"{len(session.grade_results)}개")
             if session.grade_results:
                 correct = sum(r.is_correct for r in session.grade_results)
@@ -167,7 +173,7 @@ def _start_new_session(api_key: str, target_score: int, current_score: int):
     st.session_state.page = "quiz"
     st.session_state.recommender = Recommender()  # 새 세션마다 초기화
     st.sidebar.success(
-        f"세션 시작! 초기 난이도: {difficulty.value} ({DIFFICULTY_RANGES[difficulty]})"
+        f"세션 시작! 초기 난이도: {DIFFICULTY_NAMES.get(difficulty, difficulty.value)} ({DIFFICULTY_RANGES[difficulty]})"
     )
     st.rerun()
 
@@ -224,14 +230,12 @@ def render_quiz_page():
     question = st.session_state.get("current_question")
 
     if question is None:
-        if st.button("🔄 문제 생성하기", use_container_width=True):
-            _generate_question(session, comps)
-        else:
-            st.info("'문제 생성하기' 버튼을 눌러 문제를 시작하세요.")
+        # 자동으로 문제 생성 (버튼 없이)
+        _generate_question(session, comps)
         return
 
     # 문제 표시
-    st.markdown(f"**유형:** {SUBTYPE_NAMES.get(question.subtype, str(question.subtype))} | **난이도:** {question.difficulty.value if hasattr(question.difficulty, 'value') else question.difficulty}")
+    st.markdown(f"**유형:** {SUBTYPE_NAMES.get(question.subtype, str(question.subtype))} | **난이도:** {DIFFICULTY_NAMES.get(question.difficulty, str(question.difficulty))}")
     st.markdown("---")
     st.subheader("📖 지문")
     st.markdown(f"> {question.passage}")
@@ -356,7 +360,7 @@ def _maybe_adjust_difficulty(session: Session, comps: dict):
         comps["session_store"].save(session)
         st.session_state.session = session
         st.toast(
-            f"🔄 난이도 조정: {current.value} → {new_difficulty.value} "
+            f"🔄 난이도 조정: {DIFFICULTY_NAMES.get(current, current.value)} → {DIFFICULTY_NAMES.get(new_difficulty, new_difficulty.value)} "
             f"({DIFFICULTY_RANGES[new_difficulty]})",
             icon="🔄",
         )
