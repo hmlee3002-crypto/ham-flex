@@ -235,7 +235,24 @@ def render_quiz_page():
         return
 
     # 문제 표시
-    st.markdown(f"**유형:** {SUBTYPE_NAMES.get(question.subtype, str(question.subtype))} | **난이도:** {DIFFICULTY_NAMES.get(question.difficulty, str(question.difficulty))}")
+    # subtype/difficulty를 enum으로 안전하게 변환
+    subtype = question.subtype
+    difficulty = question.difficulty
+    if isinstance(subtype, str):
+        try:
+            subtype = ReadingSubtype(subtype)
+        except ValueError:
+            pass
+    if isinstance(difficulty, str):
+        try:
+            difficulty = Difficulty(difficulty)
+        except ValueError:
+            pass
+
+    subtype_label = SUBTYPE_NAMES.get(subtype, subtype.value if hasattr(subtype, "value") else subtype)
+    difficulty_label = DIFFICULTY_NAMES.get(difficulty, difficulty.value if hasattr(difficulty, "value") else difficulty)
+
+    st.markdown(f"**유형:** {subtype_label} | **난이도:** {difficulty_label}")
     st.markdown("---")
     st.subheader("📖 지문")
     st.markdown(f"> {question.passage}")
