@@ -84,15 +84,13 @@ def render_sidebar():
         st.title("🎓 FLEX AI 학습 에이전트")
         st.markdown("---")
 
-        # API 키 입력 (Streamlit Cloud secrets 또는 직접 입력)
-        api_key = st.secrets.get("GEMINI_API_KEY", "") if hasattr(st, "secrets") else ""
-        if not api_key:
-            api_key = st.text_input(
-                "Google Gemini API 키",
-                type="password",
-                placeholder="AIza...",
-                help="Streamlit Cloud 배포 시 Secrets에 GEMINI_API_KEY를 설정하세요.",
-            )
+        # Secrets에서 API 키 자동 로드
+        try:
+            api_key = st.secrets["GEMINI_API_KEY"]
+        except (KeyError, FileNotFoundError):
+            api_key = ""
+            st.error("⚠️ GEMINI_API_KEY가 설정되지 않았습니다. Streamlit Cloud Secrets를 확인해 주세요.")
+            st.stop()
 
         st.markdown("---")
         st.subheader("📋 세션 설정")
