@@ -506,7 +506,14 @@ def render_analysis_page():
     sorted_subtypes = sorted(analysis.subtype_accuracies.items(), key=lambda x: x[1])
     rows_html = ""
     for subtype, acc in sorted_subtypes:
-        name = SUBTYPE_NAMES.get(subtype, str(subtype))
+        # enum 강제 변환
+        if isinstance(subtype, str):
+            try:
+                from flex_agent.models.data_models import ReadingSubtype as RS
+                subtype = RS(subtype)
+            except ValueError:
+                pass
+        name = SUBTYPE_NAMES.get(subtype, subtype if isinstance(subtype, str) else subtype.value)
         pct = int(acc * 100)
         is_weak = subtype in analysis.weak_subtypes
         bar_class = "bar-fill-weak" if is_weak else "bar-fill"
@@ -514,7 +521,7 @@ def render_analysis_page():
         rows_html += f"""
         <div class="subtype-row">
             <div class="subtype-label">{name}</div>
-            <div class="subtype-score" style="color:{score_color}">{pct}%{"  ⚠️ 취약" if is_weak else ""}</div>
+            <div class="subtype-score" style="color:{score_color}">{pct}%{"&nbsp;&nbsp;⚠️ 취약" if is_weak else ""}</div>
             <div class="bar-bg"><div class="{bar_class}" style="width:{pct}%"></div></div>
         </div>"""
 
@@ -530,7 +537,13 @@ def render_analysis_page():
         weak_rows_html = ""
         for subtype in analysis.weak_subtypes:
             acc = analysis.subtype_accuracies.get(subtype, 0)
-            name = SUBTYPE_NAMES.get(subtype, str(subtype))
+            if isinstance(subtype, str):
+                try:
+                    from flex_agent.models.data_models import ReadingSubtype as RS
+                    subtype = RS(subtype)
+                except ValueError:
+                    pass
+            name = SUBTYPE_NAMES.get(subtype, subtype if isinstance(subtype, str) else subtype.value)
             pct = int(acc * 100)
             weak_rows_html += f"""
             <div class="subtype-row">
@@ -614,7 +627,13 @@ def render_report_page():
     sorted_subtypes = sorted(report.subtype_accuracies.items(), key=lambda x: x[1])
     rows_html = ""
     for subtype, acc in sorted_subtypes:
-        name = SUBTYPE_NAMES.get(subtype, str(subtype))
+        if isinstance(subtype, str):
+            try:
+                from flex_agent.models.data_models import ReadingSubtype as RS
+                subtype = RS(subtype)
+            except ValueError:
+                pass
+        name = SUBTYPE_NAMES.get(subtype, subtype if isinstance(subtype, str) else subtype.value)
         pct = int(acc * 100)
         is_weak = subtype in report.weak_subtypes
         bar_class = "bar-fill-weak" if is_weak else "bar-fill"
