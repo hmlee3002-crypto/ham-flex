@@ -502,6 +502,15 @@ def _maybe_adjust_difficulty(session: Session, comps: dict):
     recent = results[-RECENT_COUNT:]
     accuracy = sum(r.is_correct for r in recent) / RECENT_COUNT
     current = session.current_difficulty
+    # 문자열로 저장된 경우 enum으로 변환
+    if isinstance(current, str):
+        try:
+            current = Difficulty(current)
+            session.current_difficulty = current
+        except ValueError:
+            return
+    if current not in DIFFICULTY_ORDER:
+        return
     current_idx = DIFFICULTY_ORDER.index(current)
     new_difficulty = None
 
