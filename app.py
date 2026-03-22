@@ -275,7 +275,7 @@ def render_home(api_key: str):
         </div>""", unsafe_allow_html=True)
 
     st.markdown("""
-    <div style="text-align:center;margin-top:32px;padding-bottom:16px;font-size:12px;color:#ccc;">
+    <div style="text-align:center;margin-top:32px;padding-bottom:16px;font-size:12px;color:#999;">
         &copy; 2026 Haemin Lee
     </div>
     """, unsafe_allow_html=True)
