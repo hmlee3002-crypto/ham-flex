@@ -274,6 +274,12 @@ def render_home(api_key: str):
             </div>
         </div>""", unsafe_allow_html=True)
 
+    st.markdown("""
+    <div style="text-align:center;margin-top:32px;padding-bottom:16px;font-size:12px;color:#ccc;">
+        &copy; 2026 Haemin Lee
+    </div>
+    """, unsafe_allow_html=True)
+
 
 def _start_new_session(api_key: str, target_score: int, current_score: int):
     """새 세션을 초기화한다."""
