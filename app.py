@@ -433,9 +433,34 @@ def _render_grade_result():
         st.markdown("**[지문]**")
         st.markdown(f"> {question.passage}")
         st.markdown(f"**[질문]** {question.question_text}")
+
+        choices_html = ""
         for i, choice in enumerate(question.choices, start=1):
-            prefix = "O " if i == result.correct_answer else ("X " if i == result.user_answer else "　 ")
-            st.markdown(f"{prefix}{i}. {choice}")
+            is_correct = (i == result.correct_answer)
+            is_wrong = (i == result.user_answer and not result.is_correct)
+            if is_correct:
+                choices_html += f"""
+                <div style="background:#e6faf8;border:2px solid #53cfca;border-radius:10px;
+                            padding:10px 16px;margin:6px 0;display:flex;align-items:center;gap:10px;">
+                    <span style="color:#53cfca;font-weight:900;font-size:16px;">●</span>
+                    <span style="font-weight:600;color:#1a1a1a;">{i}. {choice}</span>
+                </div>"""
+            elif is_wrong:
+                choices_html += f"""
+                <div style="background:#fff0f0;border:2px solid #ff5252;border-radius:10px;
+                            padding:10px 16px;margin:6px 0;display:flex;align-items:center;gap:10px;">
+                    <span style="color:#ff5252;font-weight:900;font-size:16px;">✕</span>
+                    <span style="color:#ff5252;">{i}. {choice}</span>
+                </div>"""
+            else:
+                choices_html += f"""
+                <div style="background:#f9f9f9;border:1px solid #e0e0e0;border-radius:10px;
+                            padding:10px 16px;margin:6px 0;display:flex;align-items:center;gap:10px;">
+                    <span style="color:#ccc;font-size:16px;">○</span>
+                    <span style="color:#666;">{i}. {choice}</span>
+                </div>"""
+
+        st.markdown(choices_html, unsafe_allow_html=True)
         st.markdown("---")
         st.markdown(f"**해설:** {question.explanation}")
 
