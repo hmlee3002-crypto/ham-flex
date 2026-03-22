@@ -360,7 +360,7 @@ def render_analysis_page():
 
     if not session.grade_results:
         st.warning("분석할 데이터가 없습니다. 문제를 먼저 풀어주세요.")
-        if st.button("문제 풀러 가기"):
+        if st.button("문제 풀러 가기", key="analysis_to_quiz"):
             st.session_state.page = "quiz"
             st.rerun()
         return
@@ -399,7 +399,7 @@ def render_analysis_page():
             acc = analysis.subtype_accuracies.get(subtype, 0)
             st.error(f"**{SUBTYPE_NAMES[subtype]}**: 정답률 {acc:.0%}")
 
-    if st.button("➡️ 문제 풀러 가기", use_container_width=True):
+    if st.button("➡️ 문제 풀러 가기", use_container_width=True, key="analysis_go_quiz"):
         st.session_state.page = "quiz"
         st.rerun()
 
@@ -416,7 +416,7 @@ def render_report_page():
 
     if not session.grade_results:
         st.warning("리포트를 생성할 데이터가 없습니다. 문제를 먼저 풀어주세요.")
-        if st.button("문제 풀러 가기"):
+        if st.button("문제 풀러 가기", key="report_to_quiz"):
             st.session_state.page = "quiz"
             st.rerun()
         return
@@ -479,7 +479,7 @@ def render_report_page():
         for direction in report.study_directions:
             st.info(direction)
 
-    if st.button("➡️ 계속 학습하기", use_container_width=True):
+    if st.button("➡️ 계속 학습하기", use_container_width=True, key="report_go_quiz"):
         st.session_state.page = "quiz"
         st.rerun()
 
