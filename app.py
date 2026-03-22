@@ -140,6 +140,62 @@ body, .stMarkdown, p, div { font-family: 'Inter', 'Apple SD Gothic Neo', sans-se
 .status-item-label { font-size: 11px; color: #999; }
 .status-item-value { font-size: 15px; font-weight: 700; color: #1a1a1a; }
 .status-item-value.mint { color: #53cfca; }
+
+/* ── 다크모드 ── */
+@media (prefers-color-scheme: dark) {
+    .stApp {
+        background: linear-gradient(160deg, #0f2027 0%, #1a2e2d 40%, #1a1f2e 100%) !important;
+    }
+    .card {
+        background: #1e2d2c !important;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.3) !important;
+    }
+    .card-title { color: #e8e8e8 !important; }
+    .card-subtitle { color: #7a9e9c !important; }
+    .stat-box {
+        background: #1e2d2c !important;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.3) !important;
+    }
+    .stat-label { color: #7a9e9c !important; }
+    .status-bar {
+        background: #1e2d2c !important;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.3) !important;
+    }
+    .status-item-label { color: #7a9e9c !important; }
+    .status-item-value { color: #e8e8e8 !important; }
+    .bar-bg { background-color: #2a3f3e !important; }
+    .subtype-label { color: #c0d0cf !important; }
+    /* 인라인 div 카드들 배경/텍스트 */
+    div[style*="background:#fff"],
+    div[style*="background: #fff"] {
+        background: #1e2d2c !important;
+    }
+    div[style*="background:#f9f9f9"] {
+        background: #243332 !important;
+    }
+    div[style*="background:#fff0f0"] {
+        background: #2d1a1a !important;
+    }
+    div[style*="background:#e6faf8"] {
+        background: #1a2e2c !important;
+    }
+    div[style*="color:#1a1a1a"],
+    span[style*="color:#1a1a1a"] { color: #e8e8e8 !important; }
+    div[style*="color:#444"],
+    span[style*="color:#444"] { color: #c0c0c0 !important; }
+    div[style*="color:#555"],
+    span[style*="color:#555"] { color: #b0b0b0 !important; }
+    div[style*="color:#666"],
+    span[style*="color:#666"] { color: #a0a0a0 !important; }
+    div[style*="color:#aaa"],
+    span[style*="color:#aaa"] { color: #7a9e9c !important; }
+    div[style*="color:#bbb"],
+    span[style*="color:#bbb"] { color: #7a9e9c !important; }
+    div[style*="color:#888"],
+    span[style*="color:#888"] { color: #8ab0ae !important; }
+    div[style*="color:#999"],
+    span[style*="color:#999"] { color: #8ab0ae !important; }
+}
 </style>
 """, unsafe_allow_html=True)
 
