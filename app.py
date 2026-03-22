@@ -27,6 +27,75 @@ st.set_page_config(
     layout="wide",
 )
 
+# 전역 다크 카드 CSS (분석/리포트 페이지 공통)
+st.markdown("""
+<style>
+.dark-card {
+    background-color: #2a2a2a;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+}
+.card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+.card-subtitle {
+    font-size: 13px;
+    color: #aaaaaa;
+    margin-bottom: 20px;
+}
+.subtype-row {
+    margin-bottom: 16px;
+}
+.subtype-label {
+    font-size: 14px;
+    color: #cccccc;
+    margin-bottom: 4px;
+}
+.subtype-score {
+    font-size: 15px;
+    font-weight: 700;
+    color: #4d9fff;
+    margin-bottom: 6px;
+}
+.bar-bg {
+    background-color: #444444;
+    border-radius: 4px;
+    height: 8px;
+    width: 100%;
+}
+.bar-fill {
+    background-color: #4d9fff;
+    border-radius: 4px;
+    height: 8px;
+}
+.bar-fill-weak {
+    background-color: #ff6b6b;
+    border-radius: 4px;
+    height: 8px;
+}
+.stat-box {
+    background-color: #333333;
+    border-radius: 8px;
+    padding: 12px 16px;
+    text-align: center;
+}
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #4d9fff;
+}
+.stat-label {
+    font-size: 12px;
+    color: #aaaaaa;
+    margin-top: 2px;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ─────────────────────────────────────────────
 # 세부 유형 한국어 이름
 # ─────────────────────────────────────────────
@@ -390,75 +459,6 @@ def render_analysis_page():
     session: Session = st.session_state.session
     api_key: str = st.session_state.api_key
     comps = get_components(api_key)
-
-    # 다크 카드 스타일 CSS
-    st.markdown("""
-    <style>
-    .dark-card {
-        background-color: #2a2a2a;
-        border-radius: 12px;
-        padding: 20px 24px;
-        margin-bottom: 16px;
-    }
-    .card-title {
-        font-size: 18px;
-        font-weight: 700;
-        color: #ffffff;
-        margin-bottom: 4px;
-    }
-    .card-subtitle {
-        font-size: 13px;
-        color: #aaaaaa;
-        margin-bottom: 20px;
-    }
-    .subtype-row {
-        margin-bottom: 16px;
-    }
-    .subtype-label {
-        font-size: 14px;
-        color: #cccccc;
-        margin-bottom: 4px;
-    }
-    .subtype-score {
-        font-size: 15px;
-        font-weight: 700;
-        color: #4d9fff;
-        margin-bottom: 6px;
-    }
-    .bar-bg {
-        background-color: #444444;
-        border-radius: 4px;
-        height: 8px;
-        width: 100%;
-    }
-    .bar-fill {
-        background-color: #4d9fff;
-        border-radius: 4px;
-        height: 8px;
-    }
-    .bar-fill-weak {
-        background-color: #ff6b6b;
-        border-radius: 4px;
-        height: 8px;
-    }
-    .stat-box {
-        background-color: #333333;
-        border-radius: 8px;
-        padding: 12px 16px;
-        text-align: center;
-    }
-    .stat-value {
-        font-size: 24px;
-        font-weight: 700;
-        color: #4d9fff;
-    }
-    .stat-label {
-        font-size: 12px;
-        color: #aaaaaa;
-        margin-top: 2px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
     st.title("📊 실력 분석")
 
