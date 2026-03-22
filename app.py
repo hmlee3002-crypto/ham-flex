@@ -224,29 +224,24 @@ def render_home(api_key: str):
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    with st.container():
-        st.markdown('<div class="card">', unsafe_allow_html=True)
+    target_score = st.number_input(
+        "목표 점수 (0~600)",
+        min_value=0, max_value=600, value=450, step=10,
+        key="home_target",
+    )
 
-        target_score = st.number_input(
-            "목표 점수 (0~600)",
-            min_value=0, max_value=600, value=450, step=10,
-            key="home_target",
-        )
-
-        difficulty_option = st.radio(
-            "시작 난이도",
-            options=["쉬움 (0~350점)", "보통 (351~450점)", "어려움 (451~600점)"],
-            horizontal=True,
-            key="home_difficulty",
-        )
-        difficulty_map = {
-            "쉬움 (0~350점)": (Difficulty.EASY, 300),
-            "보통 (351~450점)": (Difficulty.MEDIUM, 400),
-            "어려움 (451~600점)": (Difficulty.HARD, 500),
-        }
-        selected_difficulty, current_score = difficulty_map[difficulty_option]
-
-        st.markdown("</div>", unsafe_allow_html=True)
+    difficulty_option = st.radio(
+        "시작 난이도",
+        options=["쉬움 (0~350점)", "보통 (351~450점)", "어려움 (451~600점)"],
+        horizontal=True,
+        key="home_difficulty",
+    )
+    difficulty_map = {
+        "쉬움 (0~350점)": (Difficulty.EASY, 300),
+        "보통 (351~450점)": (Difficulty.MEDIUM, 400),
+        "어려움 (451~600점)": (Difficulty.HARD, 500),
+    }
+    selected_difficulty, current_score = difficulty_map[difficulty_option]
 
     col_start, col_load = st.columns(2)
     with col_start:
