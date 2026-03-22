@@ -391,7 +391,76 @@ def render_analysis_page():
     api_key: str = st.session_state.api_key
     comps = get_components(api_key)
 
-    st.title("📊 오답 분석")
+    # 다크 카드 스타일 CSS
+    st.markdown("""
+    <style>
+    .dark-card {
+        background-color: #2a2a2a;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 16px;
+    }
+    .card-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 4px;
+    }
+    .card-subtitle {
+        font-size: 13px;
+        color: #aaaaaa;
+        margin-bottom: 20px;
+    }
+    .subtype-row {
+        margin-bottom: 16px;
+    }
+    .subtype-label {
+        font-size: 14px;
+        color: #cccccc;
+        margin-bottom: 4px;
+    }
+    .subtype-score {
+        font-size: 15px;
+        font-weight: 700;
+        color: #4d9fff;
+        margin-bottom: 6px;
+    }
+    .bar-bg {
+        background-color: #444444;
+        border-radius: 4px;
+        height: 8px;
+        width: 100%;
+    }
+    .bar-fill {
+        background-color: #4d9fff;
+        border-radius: 4px;
+        height: 8px;
+    }
+    .bar-fill-weak {
+        background-color: #ff6b6b;
+        border-radius: 4px;
+        height: 8px;
+    }
+    .stat-box {
+        background-color: #333333;
+        border-radius: 8px;
+        padding: 12px 16px;
+        text-align: center;
+    }
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #4d9fff;
+    }
+    .stat-label {
+        font-size: 12px;
+        color: #aaaaaa;
+        margin-top: 2px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.title("📊 실력 분석")
 
     if not session.grade_results:
         st.warning("분석할 데이터가 없습니다. 문제를 먼저 풀어주세요.")
@@ -406,34 +475,78 @@ def render_analysis_page():
     if analysis.warning_message:
         st.warning(analysis.warning_message)
 
-    # 전체 정답률
+    # 상단 통계 카드
+    total = len(session.grade_results)
+    correct = sum(r.is_correct for r in session.grade_results)
+    accuracy_pct = int(analysis.total_accuracy * 100)
+
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("전체 정답률", f"{analysis.total_accuracy:.0%}")
+        st.markdown(f"""
+        <div class="stat-box">
+            <div class="stat-value">{accuracy_pct}%</div>
+            <div class="stat-label">전체 정답률</div>
+        </div>""", unsafe_allow_html=True)
     with col2:
-        st.metric("풀이한 문제", f"{len(session.grade_results)}개")
+        st.markdown(f"""
+        <div class="stat-box">
+            <div class="stat-value">{total}</div>
+            <div class="stat-label">풀이한 문제</div>
+        </div>""", unsafe_allow_html=True)
     with col3:
-        correct = sum(r.is_correct for r in session.grade_results)
-        st.metric("정답 수", f"{correct}개")
+        st.markdown(f"""
+        <div class="stat-box">
+            <div class="stat-value">{correct}</div>
+            <div class="stat-label">정답 수</div>
+        </div>""", unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.subheader("세부 유형별 정답률")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    # 정답률 바 차트
-    subtype_data = {
-        SUBTYPE_NAMES.get(subtype, str(subtype)): round(acc * 100, 1)
-        for subtype, acc in sorted(analysis.subtype_accuracies.items(), key=lambda x: x[1])
-    }
-    if subtype_data:
-        st.bar_chart(subtype_data)
+    # 유형별 정답률 카드
+    sorted_subtypes = sorted(analysis.subtype_accuracies.items(), key=lambda x: x[1])
+    rows_html = ""
+    for subtype, acc in sorted_subtypes:
+        name = SUBTYPE_NAMES.get(subtype, str(subtype))
+        pct = int(acc * 100)
+        is_weak = subtype in analysis.weak_subtypes
+        bar_class = "bar-fill-weak" if is_weak else "bar-fill"
+        score_color = "#ff6b6b" if is_weak else "#4d9fff"
+        rows_html += f"""
+        <div class="subtype-row">
+            <div class="subtype-label">{name}</div>
+            <div class="subtype-score" style="color:{score_color}">{pct}%{"  ⚠️ 취약" if is_weak else ""}</div>
+            <div class="bar-bg"><div class="{bar_class}" style="width:{pct}%"></div></div>
+        </div>"""
 
-    # 취약 영역 강조
+    st.markdown(f"""
+    <div class="dark-card">
+        <div class="card-title">유형별 정답률</div>
+        <div class="card-subtitle">정답률 60% 미만은 취약 영역으로 분류됩니다</div>
+        {rows_html}
+    </div>""", unsafe_allow_html=True)
+
+    # 취약 개념 카드
     if analysis.weak_subtypes:
-        st.subheader("⚠️ 취약 영역")
+        weak_rows_html = ""
         for subtype in analysis.weak_subtypes:
             acc = analysis.subtype_accuracies.get(subtype, 0)
-            st.error(f"**{SUBTYPE_NAMES.get(subtype, str(subtype))}**: 정답률 {acc:.0%}")
+            name = SUBTYPE_NAMES.get(subtype, str(subtype))
+            pct = int(acc * 100)
+            weak_rows_html += f"""
+            <div class="subtype-row">
+                <div class="subtype-label">{name}</div>
+                <div class="subtype-score" style="color:#ff6b6b">{pct}%</div>
+                <div class="bar-bg"><div class="bar-fill-weak" style="width:{pct}%"></div></div>
+            </div>"""
 
+        st.markdown(f"""
+        <div class="dark-card">
+            <div class="card-title">취약한 개념</div>
+            <div class="card-subtitle">집중적으로 연습이 필요한 유형입니다</div>
+            {weak_rows_html}
+        </div>""", unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
     if st.button("➡️ 문제 풀러 가기", use_container_width=True, key="analysis_go_quiz"):
         st.session_state.active_tab = "quiz"
         st.rerun()
@@ -458,62 +571,81 @@ def render_report_page():
 
     report_generator = comps["report_generator"]
     report = report_generator.generate(session)
-    # 세션 갱신 (리포트 저장됨)
     st.session_state.session = comps["session_store"].load()
 
     if report is None:
         st.warning("리포트 생성에 실패했습니다.")
         return
 
-    # 핵심 지표
+    # 핵심 지표 카드
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("예상 점수", f"{report.predicted_score:.1f}점")
+        st.markdown(f"""
+        <div class="stat-box">
+            <div class="stat-value">{report.predicted_score:.0f}</div>
+            <div class="stat-label">예상 점수</div>
+        </div>""", unsafe_allow_html=True)
     with col2:
-        st.metric("목표 점수", f"{report.target_score}점")
+        st.markdown(f"""
+        <div class="stat-box">
+            <div class="stat-value">{report.target_score}</div>
+            <div class="stat-label">목표 점수</div>
+        </div>""", unsafe_allow_html=True)
     with col3:
-        delta_color = "normal" if report.achievement_rate >= 80 else "inverse"
-        st.metric("달성률", f"{report.achievement_rate:.1f}%")
+        achieve_color = "#4d9fff" if report.achievement_rate >= 80 else "#ff6b6b"
+        st.markdown(f"""
+        <div class="stat-box">
+            <div class="stat-value" style="color:{achieve_color}">{report.achievement_rate:.0f}%</div>
+            <div class="stat-label">목표 달성률</div>
+        </div>""", unsafe_allow_html=True)
 
-    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    # 세부 유형별 정답률
-    st.subheader("📈 세부 유형별 정답률")
-    subtype_data = {
-        SUBTYPE_NAMES.get(subtype, str(subtype)): round(acc * 100, 1)
-        for subtype, acc in sorted(report.subtype_accuracies.items(), key=lambda x: x[1], reverse=True)
-    }
-    if subtype_data:
-        st.bar_chart(subtype_data)
+    # 예상 점수 vs 목표 점수 진행 바
+    progress_pct = min(int(report.predicted_score / report.target_score * 100), 100) if report.target_score > 0 else 0
+    st.markdown(f"""
+    <div class="dark-card">
+        <div class="card-title">목표 달성 현황</div>
+        <div class="card-subtitle">예상 점수 {report.predicted_score:.0f}점 / 목표 {report.target_score}점</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:{progress_pct}%"></div></div>
+    </div>""", unsafe_allow_html=True)
 
-    col_strong, col_weak = st.columns(2)
-    with col_strong:
-        if report.strong_subtypes:
-            st.subheader("💪 강점 영역")
-            for subtype in report.strong_subtypes:
-                acc = report.subtype_accuracies.get(subtype, 0)
-                st.success(f"**{SUBTYPE_NAMES.get(subtype, str(subtype))}**: {acc:.0%}")
-        else:
-            st.subheader("💪 강점 영역")
-            st.info("아직 강점 영역이 없습니다.")
+    # 유형별 정답률
+    sorted_subtypes = sorted(report.subtype_accuracies.items(), key=lambda x: x[1])
+    rows_html = ""
+    for subtype, acc in sorted_subtypes:
+        name = SUBTYPE_NAMES.get(subtype, str(subtype))
+        pct = int(acc * 100)
+        is_weak = subtype in report.weak_subtypes
+        bar_class = "bar-fill-weak" if is_weak else "bar-fill"
+        score_color = "#ff6b6b" if is_weak else "#4d9fff"
+        rows_html += f"""
+        <div class="subtype-row">
+            <div class="subtype-label">{name}</div>
+            <div class="subtype-score" style="color:{score_color}">{pct}%</div>
+            <div class="bar-bg"><div class="{bar_class}" style="width:{pct}%"></div></div>
+        </div>"""
 
-    with col_weak:
-        if report.weak_subtypes:
-            st.subheader("⚠️ 취약 영역")
-            for subtype in report.weak_subtypes:
-                acc = report.subtype_accuracies.get(subtype, 0)
-                st.error(f"**{SUBTYPE_NAMES.get(subtype, str(subtype))}**: {acc:.0%}")
-        else:
-            st.subheader("⚠️ 취약 영역")
-            st.success("취약 영역이 없습니다. 훌륭해요!")
+    st.markdown(f"""
+    <div class="dark-card">
+        <div class="card-title">유형별 정답률</div>
+        {rows_html}
+    </div>""", unsafe_allow_html=True)
 
     # 학습 방향
     if report.study_directions:
-        st.markdown("---")
-        st.subheader("📚 학습 방향")
-        for direction in report.study_directions:
-            st.info(direction)
+        directions_html = "".join(
+            f'<div style="color:#cccccc;font-size:14px;padding:8px 0;border-bottom:1px solid #444">• {d}</div>'
+            for d in report.study_directions
+        )
+        st.markdown(f"""
+        <div class="dark-card">
+            <div class="card-title">📚 학습 방향</div>
+            <div class="card-subtitle">취약 영역 기반 추천 학습 방향입니다</div>
+            {directions_html}
+        </div>""", unsafe_allow_html=True)
 
+    st.markdown("<br>", unsafe_allow_html=True)
     if st.button("➡️ 계속 학습하기", use_container_width=True, key="report_go_quiz"):
         st.session_state.active_tab = "quiz"
         st.rerun()
