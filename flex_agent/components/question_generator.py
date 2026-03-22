@@ -128,6 +128,12 @@ class QuestionGenerator:
             LLMResponseParseError: LLM 응답 파싱 실패 시
             QuestionGenerationError: LLM 호출 실패 시
         """
+        # 잘못된 타입이 들어온 경우 fallback
+        if not isinstance(subtype, ReadingSubtype):
+            subtype = ReadingSubtype.TOPIC
+        if not isinstance(difficulty, Difficulty):
+            difficulty = Difficulty.MEDIUM
+
         prompt = self._build_prompt(subtype, difficulty)
         raw_response = self._llm_client.complete(prompt)
         question = self._parse_llm_response(raw_response, subtype, difficulty)
@@ -152,8 +158,12 @@ class QuestionGenerator:
         Returns:
             LLM에 전달할 프롬프트 문자열
         """
-        subtype_info = _SUBTYPE_DESCRIPTIONS[subtype]
-        difficulty_info = _DIFFICULTY_GUIDELINES[difficulty]
+        subtype_info = _SUBTYPE_DESCRIPTIONS.get(subtype)
+        if subtype_info is None:
+            # fallback: TOPIC으로 대체
+            subtype = ReadingSubtype.TOPIC
+            subtype_info = _SUBTYPE_DESCRIPTIONS[subtype]
+        difficulty_info = _DIFFICULTY_GUIDELINES.get(difficulty, _DIFFICULTY_GUIDELINES[Difficulty.MEDIUM])
         example_q = subtype_info["example_questions"][0]
 
         prompt = f"""당신은 FLEX 중국어 시험 문제 출제 전문가입니다.
