@@ -256,11 +256,64 @@ def render_home(api_key: str):
     st.markdown("""
     <div class="card">
         <div class="card-title">주요 기능</div>
-        <div style="color:#555; font-size:14px; line-height:2.2; margin-top:12px;">
-            FLEX 스타일 문제 자동 생성<br>
-            오답 분석 및 취약 영역 확인<br>
-            예상 점수 확인 및 학습 리포트<br>
-            난이도 자동 조절 기반 학습
+        <div style="margin-top:16px; display:flex; flex-direction:column; gap:14px;">
+
+            <div style="display:flex; gap:14px; align-items:flex-start;">
+                <div style="min-width:24px; height:24px; background:linear-gradient(135deg,#53cfca,#38b2ac);
+                            border-radius:50%; display:flex; align-items:center; justify-content:center;
+                            font-size:12px; font-weight:800; color:#fff; margin-top:2px;">1</div>
+                <div>
+                    <div style="font-size:14px; font-weight:600; color:#1a1a1a;">
+                        <span style="color:#53cfca;">문제 자동 생성</span>
+                    </div>
+                    <div style="font-size:12px; color:#aaa; margin-top:3px; line-height:1.6;">
+                        실제 FLEX 시험 스타일의 중국어 독해 문제를 AI가 즉시 생성합니다.
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:14px; align-items:flex-start;">
+                <div style="min-width:24px; height:24px; background:linear-gradient(135deg,#53cfca,#38b2ac);
+                            border-radius:50%; display:flex; align-items:center; justify-content:center;
+                            font-size:12px; font-weight:800; color:#fff; margin-top:2px;">2</div>
+                <div>
+                    <div style="font-size:14px; font-weight:600; color:#1a1a1a;">
+                        <span style="color:#53cfca;">오답 분석</span> 및 취약 영역 확인
+                    </div>
+                    <div style="font-size:12px; color:#aaa; margin-top:3px; line-height:1.6;">
+                        틀린 문제의 유형과 패턴을 분석해 어떤 영역이 취약한지 시각적으로 보여줍니다.
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:14px; align-items:flex-start;">
+                <div style="min-width:24px; height:24px; background:linear-gradient(135deg,#53cfca,#38b2ac);
+                            border-radius:50%; display:flex; align-items:center; justify-content:center;
+                            font-size:12px; font-weight:800; color:#fff; margin-top:2px;">3</div>
+                <div>
+                    <div style="font-size:14px; font-weight:600; color:#1a1a1a;">
+                        <span style="color:#53cfca;">예상 점수</span> 확인 및 학습 리포트
+                    </div>
+                    <div style="font-size:12px; color:#aaa; margin-top:3px; line-height:1.6;">
+                        풀이 데이터를 바탕으로 현재 실력의 예상 점수와 보완점을 리포트로 제공합니다.
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:14px; align-items:flex-start;">
+                <div style="min-width:24px; height:24px; background:linear-gradient(135deg,#53cfca,#38b2ac);
+                            border-radius:50%; display:flex; align-items:center; justify-content:center;
+                            font-size:12px; font-weight:800; color:#fff; margin-top:2px;">4</div>
+                <div>
+                    <div style="font-size:14px; font-weight:600; color:#1a1a1a;">
+                        <span style="color:#53cfca;">난이도 자동 조절</span> 기반 학습
+                    </div>
+                    <div style="font-size:12px; color:#aaa; margin-top:3px; line-height:1.6;">
+                        최근 5문제 정답률에 따라 난이도가 자동으로 올라가거나 내려가 최적의 학습 흐름을 유지합니다.
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     """, unsafe_allow_html=True)
