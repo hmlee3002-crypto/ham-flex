@@ -253,26 +253,24 @@ def render_home(api_key: str):
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    st.markdown('<div class="card"><div class="card-title">주요 기능</div></div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:13px;font-weight:600;color:#888;margin:20px 0 10px;">주요 기능</div>', unsafe_allow_html=True)
 
     features = [
-        ("1", "문제 자동 생성", "실제 FLEX 시험 스타일의 중국어 독해 문제를 AI가 즉시 생성합니다."),
-        ("2", "오답 분석", "틀린 문제의 유형과 패턴을 분석해 어떤 영역이 취약한지 시각적으로 보여줍니다."),
-        ("3", "예상 점수 & 학습 리포트", "풀이 데이터를 바탕으로 현재 실력의 예상 점수와 보완점을 리포트로 제공합니다."),
-        ("4", "난이도 자동 조절", "최근 5문제 정답률에 따라 난이도가 자동으로 조절되어 최적의 학습 흐름을 유지합니다."),
+        ("1", "문제 자동 생성", "FLEX 스타일 중국어 독해 문제를 즉시 생성"),
+        ("2", "오답 분석", "취약 유형을 시각적으로 파악"),
+        ("3", "예상 점수", "풀이 데이터 기반 점수 예측"),
+        ("4", "난이도 조절", "정답률에 따라 자동으로 조정"),
     ]
-    for num, title, desc in features:
-        st.markdown(f"""
-        <div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;
-                    box-shadow:0 1px 8px rgba(83,207,202,0.08);display:flex;gap:14px;align-items:flex-start;">
-            <div style="min-width:26px;height:26px;background:linear-gradient(135deg,#53cfca,#38b2ac);
-                        border-radius:50%;display:flex;align-items:center;justify-content:center;
-                        font-size:12px;font-weight:800;color:#fff;flex-shrink:0;margin-top:1px;">{num}</div>
-            <div>
-                <div style="font-size:14px;font-weight:700;color:#53cfca;">{title}</div>
-                <div style="font-size:12px;color:#aaa;margin-top:4px;line-height:1.6;">{desc}</div>
-            </div>
-        </div>""", unsafe_allow_html=True)
+    col_a, col_b = st.columns(2)
+    for i, (num, title, desc) in enumerate(features):
+        col = col_a if i % 2 == 0 else col_b
+        with col:
+            st.markdown(f"""
+            <div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:10px;
+                        border-left:3px solid #53cfca;box-shadow:0 1px 6px rgba(83,207,202,0.08);">
+                <div style="font-size:13px;font-weight:700;color:#1a1a1a;">{title}</div>
+                <div style="font-size:11px;color:#bbb;margin-top:3px;line-height:1.5;">{desc}</div>
+            </div>""", unsafe_allow_html=True)
 
 
 def _start_new_session(api_key: str, target_score: int, current_score: int):
