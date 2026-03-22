@@ -291,28 +291,36 @@ def _render_grade_result():
     else:
         st.error(f"❌ 오답입니다. 정답은 **{result.correct_answer}번** 입니다. (입력: {result.user_answer}번)")
 
-    with st.expander("📖 해설 보기", expanded=True):
-        st.write(question.explanation)
+    # 문제 + 해설 함께 표시
+    with st.expander("📖 문제 및 해설 보기", expanded=True):
+        st.markdown("**[지문]**")
+        st.markdown(f"> {question.passage}")
+        st.markdown(f"**[질문]** {question.question_text}")
+        for i, choice in enumerate(question.choices, start=1):
+            prefix = "✅ " if i == result.correct_answer else ("❌ " if i == result.user_answer else "　 ")
+            st.markdown(f"{prefix}{i}. {choice}")
+        st.markdown("---")
+        st.markdown(f"**해설:** {question.explanation}")
 
     st.markdown("---")
     st.subheader("다음 행동을 선택하세요")
     col1, col2, col3 = st.columns(3)
     with col1:
-        if st.button("➡️ 다음 문제", use_container_width=True):
+        if st.button("➡️ 다음 문제", use_container_width=True, key="grade_next"):
             st.session_state.current_question = None
             st.session_state.grade_result = None
             st.rerun()
     with col2:
-        if st.button("📊 오답 분석", use_container_width=True):
-            st.session_state.page = "analysis"
+        if st.button("📊 오답 분석", use_container_width=True, key="grade_analysis"):
             st.session_state.current_question = None
             st.session_state.grade_result = None
+            st.session_state.active_tab = "analysis"
             st.rerun()
     with col3:
-        if st.button("📋 학습 리포트", use_container_width=True):
-            st.session_state.page = "report"
+        if st.button("📋 학습 리포트", use_container_width=True, key="grade_report"):
             st.session_state.current_question = None
             st.session_state.grade_result = None
+            st.session_state.active_tab = "report"
             st.rerun()
 
 
@@ -367,7 +375,7 @@ def render_analysis_page():
     if not session.grade_results:
         st.warning("분석할 데이터가 없습니다. 문제를 먼저 풀어주세요.")
         if st.button("문제 풀러 가기", key="analysis_to_quiz"):
-            st.session_state.page = "quiz"
+            st.session_state.active_tab = "quiz"
             st.rerun()
         return
 
@@ -406,7 +414,7 @@ def render_analysis_page():
             st.error(f"**{SUBTYPE_NAMES[subtype]}**: 정답률 {acc:.0%}")
 
     if st.button("➡️ 문제 풀러 가기", use_container_width=True, key="analysis_go_quiz"):
-        st.session_state.page = "quiz"
+        st.session_state.active_tab = "quiz"
         st.rerun()
 
 
@@ -423,7 +431,7 @@ def render_report_page():
     if not session.grade_results:
         st.warning("리포트를 생성할 데이터가 없습니다. 문제를 먼저 풀어주세요.")
         if st.button("문제 풀러 가기", key="report_to_quiz"):
-            st.session_state.page = "quiz"
+            st.session_state.active_tab = "quiz"
             st.rerun()
         return
 
@@ -486,7 +494,7 @@ def render_report_page():
             st.info(direction)
 
     if st.button("➡️ 계속 학습하기", use_container_width=True, key="report_go_quiz"):
-        st.session_state.page = "quiz"
+        st.session_state.active_tab = "quiz"
         st.rerun()
 
 
@@ -516,20 +524,36 @@ def main():
         return
 
     # 페이지 라우팅
-    page = st.session_state.get("page", "quiz")
+    page = st.session_state.get("active_tab", "quiz")
 
-    # 상단 탭 네비게이션
-    tab1, tab2, tab3 = st.tabs(["📝 문제 풀기", "📊 오답 분석", "📋 학습 리포트"])
+    # 상단 네비게이션 버튼
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("📝 문제 풀기", use_container_width=True, key="nav_quiz",
+                     type="primary" if page == "quiz" else "secondary"):
+            st.session_state.active_tab = "quiz"
+            st.rerun()
+    with col2:
+        if st.button("📊 오답 분석", use_container_width=True, key="nav_analysis",
+                     type="primary" if page == "analysis" else "secondary"):
+            st.session_state.active_tab = "analysis"
+            st.rerun()
+    with col3:
+        if st.button("📋 학습 리포트", use_container_width=True, key="nav_report",
+                     type="primary" if page == "report" else "secondary"):
+            st.session_state.active_tab = "report"
+            st.rerun()
 
-    with tab1:
-        st.session_state.page = "quiz" if page == "quiz" else page
+    st.markdown("---")
+
+    if page == "quiz":
         render_quiz_page()
-
-    with tab2:
+    elif page == "analysis":
         render_analysis_page()
-
-    with tab3:
+    elif page == "report":
         render_report_page()
+    else:
+        render_quiz_page()
 
 
 if __name__ == "__main__":

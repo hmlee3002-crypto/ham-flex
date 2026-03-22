@@ -26,14 +26,16 @@ class Recommender:
     """
     취약 영역 기반 맞춤 문제 추천 컴포넌트.
 
-    내부 순환 인덱스를 유지하여 취약 영역 간 균등 순환 추천을 보장한다.
+    같은 유형을 QUESTIONS_PER_SUBTYPE문제씩 연속 출제 후 다음 유형으로 순환한다.
     """
 
+    QUESTIONS_PER_SUBTYPE = 3  # 유형당 연속 출제 문제 수
+
     def __init__(self) -> None:
-        # 취약 영역 순환 인덱스
-        self._weak_index: int = 0
-        # 전체 유형 순환 인덱스 (취약 영역 없을 때 사용)
-        self._all_index: int = 0
+        self._weak_index: int = 0       # 취약 유형 순환 인덱스
+        self._all_index: int = 0        # 전체 유형 순환 인덱스
+        self._current_subtype: ReadingSubtype = _ALL_SUBTYPES[0]
+        self._count_in_subtype: int = 0  # 현재 유형에서 출제한 문제 수
 
     def recommend_subtype(
         self,
@@ -43,8 +45,7 @@ class Recommender:
         """
         다음 문제 유형을 추천한다.
 
-        취약 영역이 있으면 취약 영역을 순환 추천하고,
-        없으면 모든 유형을 균등 순환 추천한다.
+        같은 유형을 QUESTIONS_PER_SUBTYPE문제씩 연속 출제 후 다음 유형으로 순환한다.
 
         Args:
             analysis: 오답 분석 결과
@@ -53,16 +54,27 @@ class Recommender:
         Returns:
             추천된 ReadingSubtype
         """
+        pool = analysis.weak_subtypes if analysis.weak_subtypes else _ALL_SUBTYPES
+
+        # 현재 유형이 pool에 있고 아직 연속 출제 횟수가 남아있으면 유지
+        if (
+            self._current_subtype in pool
+            and self._count_in_subtype < self.QUESTIONS_PER_SUBTYPE
+        ):
+            self._count_in_subtype += 1
+            return self._current_subtype
+
+        # 다음 유형으로 순환
         if analysis.weak_subtypes:
-            # 취약 영역 순환 추천
-            subtype = analysis.weak_subtypes[self._weak_index % len(analysis.weak_subtypes)]
-            self._weak_index += 1
-            return subtype
+            self._weak_index = (self._weak_index + 1) % len(pool)
+            next_subtype = pool[self._weak_index]
         else:
-            # 취약 영역 없으면 모든 유형 균등 순환
-            subtype = _ALL_SUBTYPES[self._all_index % len(_ALL_SUBTYPES)]
-            self._all_index += 1
-            return subtype
+            self._all_index = (self._all_index + 1) % len(pool)
+            next_subtype = pool[self._all_index]
+
+        self._current_subtype = next_subtype
+        self._count_in_subtype = 1
+        return next_subtype
 
     def get_recommendation_reason(
         self,
