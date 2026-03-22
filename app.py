@@ -85,13 +85,13 @@ def render_sidebar():
         st.markdown("---")
 
         # API 키 입력 (Streamlit Cloud secrets 또는 직접 입력)
-        api_key = st.secrets.get("OPENAI_API_KEY", "") if hasattr(st, "secrets") else ""
+        api_key = st.secrets.get("GEMINI_API_KEY", "") if hasattr(st, "secrets") else ""
         if not api_key:
             api_key = st.text_input(
-                "OpenAI API 키",
+                "Google Gemini API 키",
                 type="password",
-                placeholder="sk-...",
-                help="Streamlit Cloud 배포 시 Secrets에 OPENAI_API_KEY를 설정하세요.",
+                placeholder="AIza...",
+                help="Streamlit Cloud 배포 시 Secrets에 GEMINI_API_KEY를 설정하세요.",
             )
 
         st.markdown("---")

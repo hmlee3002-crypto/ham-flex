@@ -36,7 +36,7 @@ streamlit run app.py
 3. **Settings → Secrets**에 아래 내용을 추가합니다:
 
 ```toml
-OPENAI_API_KEY = "sk-..."
+GEMINI_API_KEY = "AIza..."
 ```
 
 4. Deploy 버튼을 누르면 자동 배포됩니다.
