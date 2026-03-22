@@ -24,75 +24,122 @@ from flex_agent.utils import determine_difficulty, validate_score
 st.set_page_config(
     page_title="FLEX AI 학습 에이전트",
     page_icon="🎓",
-    layout="wide",
+    layout="centered",
 )
 
-# 전역 다크 카드 CSS (분석/리포트 페이지 공통)
+# 전역 CSS
 st.markdown("""
 <style>
-.dark-card {
-    background-color: #2a2a2a;
-    border-radius: 12px;
-    padding: 20px 24px;
+/* 전체 배경 그라데이션 */
+.stApp {
+    background: linear-gradient(160deg, #e8faf9 0%, #d0f0ee 40%, #eef4ff 100%);
+    min-height: 100vh;
+}
+
+/* 기본 텍스트 */
+body, .stMarkdown, p, div { font-family: 'Inter', 'Apple SD Gothic Neo', sans-serif; }
+
+/* 흰색 둥근 카드 */
+.card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 24px 28px;
     margin-bottom: 16px;
+    box-shadow: 0 2px 16px rgba(83,207,202,0.10);
 }
 .card-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
-    color: #ffffff;
+    color: #1a1a1a;
     margin-bottom: 4px;
 }
 .card-subtitle {
     font-size: 13px;
-    color: #aaaaaa;
-    margin-bottom: 20px;
+    color: #888;
+    margin-bottom: 18px;
 }
-.subtype-row {
+
+/* 민트 그라데이션 카드 */
+.card-mint {
+    background: linear-gradient(135deg, #53cfca 0%, #38b2ac 100%);
+    border-radius: 20px;
+    padding: 24px 28px;
     margin-bottom: 16px;
+    color: #fff;
 }
-.subtype-label {
-    font-size: 14px;
-    color: #cccccc;
-    margin-bottom: 4px;
+
+/* 통계 박스 */
+.stat-box {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(83,207,202,0.10);
 }
-.subtype-score {
-    font-size: 15px;
-    font-weight: 700;
-    color: #4d9fff;
-    margin-bottom: 6px;
+.stat-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: #53cfca;
 }
+.stat-label {
+    font-size: 12px;
+    color: #999;
+    margin-top: 2px;
+}
+
+/* 유형별 정답률 행 */
+.subtype-row { margin-bottom: 18px; }
+.subtype-label { font-size: 14px; color: #444; margin-bottom: 4px; font-weight: 500; }
+.subtype-score { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+
+/* 진행 바 */
 .bar-bg {
-    background-color: #444444;
-    border-radius: 4px;
+    background-color: #e8f8f7;
+    border-radius: 99px;
     height: 8px;
     width: 100%;
 }
 .bar-fill {
-    background-color: #4d9fff;
-    border-radius: 4px;
+    background: linear-gradient(90deg, #53cfca, #38b2ac);
+    border-radius: 99px;
     height: 8px;
 }
 .bar-fill-weak {
-    background-color: #ff6b6b;
-    border-radius: 4px;
+    background: linear-gradient(90deg, #ff8a80, #ff5252);
+    border-radius: 99px;
     height: 8px;
 }
-.stat-box {
-    background-color: #333333;
-    border-radius: 8px;
-    padding: 12px 16px;
-    text-align: center;
+
+/* 버튼 스타일 오버라이드 */
+.stButton > button {
+    border-radius: 12px !important;
+    font-weight: 600 !important;
 }
-.stat-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: #4d9fff;
+.stButton > button[kind="primary"] {
+    background: linear-gradient(135deg, #53cfca, #38b2ac) !important;
+    border: none !important;
+    color: white !important;
 }
-.stat-label {
-    font-size: 12px;
-    color: #aaaaaa;
-    margin-top: 2px;
+
+/* 입력 필드 */
+.stNumberInput > div > div > input,
+.stRadio { border-radius: 12px !important; }
+
+/* 상단 상태 바 */
+.status-bar {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 12px 20px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(83,207,202,0.10);
+    flex-wrap: wrap;
 }
+.status-item-label { font-size: 11px; color: #999; }
+.status-item-value { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+.status-item-value.mint { color: #53cfca; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -167,26 +214,27 @@ def get_api_key() -> str:
 # 홈 화면
 # ─────────────────────────────────────────────
 def render_home(api_key: str):
-    _, col, _ = st.columns([1, 2, 1])
-    with col:
-        st.markdown("""
-        <div style="text-align:center; padding: 32px 0 16px 0;">
-            <div style="font-size:48px">🎓</div>
-            <div style="font-size:28px; font-weight:800; margin-top:8px;">FLEX AI 학습 에이전트</div>
-            <div style="font-size:15px; color:#888; margin-top:8px;">FLEX 중국어 독해 영역을 AI로 대비하세요</div>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown("""
+    <div style="padding: 40px 0 8px 0;">
+        <div style="font-size:13px; color:#53cfca; font-weight:600; letter-spacing:1px; text-transform:uppercase;">FLEX AI</div>
+        <div style="font-size:32px; font-weight:800; color:#1a1a1a; margin-top:4px; line-height:1.2;">학습 에이전트</div>
+        <div style="font-size:15px; color:#888; margin-top:8px;">FLEX 중국어 독해 영역을 AI로 대비하세요</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-        st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    with st.container():
+        st.markdown('<div class="card">', unsafe_allow_html=True)
 
         target_score = st.number_input(
-            "🎯 목표 점수 (0~600)",
+            "목표 점수 (0~600)",
             min_value=0, max_value=600, value=450, step=10,
             key="home_target",
         )
 
         difficulty_option = st.radio(
-            "📚 시작 난이도",
+            "시작 난이도",
             options=["쉬움 (0~350점)", "보통 (351~450점)", "어려움 (451~600점)"],
             horizontal=True,
             key="home_difficulty",
@@ -198,29 +246,29 @@ def render_home(api_key: str):
         }
         selected_difficulty, current_score = difficulty_map[difficulty_option]
 
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-        col_start, col_load = st.columns(2)
-        with col_start:
-            if st.button("🚀 새 세션 시작", use_container_width=True, type="primary", key="home_start"):
-                _start_new_session(api_key, target_score, current_score)
-        with col_load:
-            if st.button("📂 이어하기", use_container_width=True, key="home_load"):
-                _load_existing_session(api_key)
+    col_start, col_load = st.columns(2)
+    with col_start:
+        if st.button("새 세션 시작", use_container_width=True, type="primary", key="home_start"):
+            _start_new_session(api_key, target_score, current_score)
+    with col_load:
+        if st.button("이어하기", use_container_width=True, key="home_load"):
+            _load_existing_session(api_key)
 
-        st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
 
-        st.markdown("""
-        <div style="background:#1a1a1a; border-radius:12px; padding:20px 24px;">
-            <div style="font-size:15px; font-weight:700; color:#fff; margin-bottom:14px;">주요 기능</div>
-            <div style="color:#ccc; font-size:14px; line-height:2.2;">
-                🤖 &nbsp;FLEX 스타일 문제 자동 생성<br>
-                📊 &nbsp;오답 분석 및 취약 영역 확인<br>
-                📈 &nbsp;예상 점수 확인 및 학습 리포트<br>
-                🔄 &nbsp;난이도 자동 조절 기반 학습
-            </div>
+    st.markdown("""
+    <div class="card">
+        <div class="card-title">주요 기능</div>
+        <div style="color:#555; font-size:14px; line-height:2.2; margin-top:12px;">
+            FLEX 스타일 문제 자동 생성<br>
+            오답 분석 및 취약 영역 확인<br>
+            예상 점수 확인 및 학습 리포트<br>
+            난이도 자동 조절 기반 학습
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def _start_new_session(api_key: str, target_score: int, current_score: int):
@@ -289,7 +337,7 @@ def render_quiz_page():
     api_key: str = st.session_state.api_key
     comps = get_components(api_key)
 
-    st.title("📝 문제 풀기")
+    st.title("문제 풀기")
 
     # 난이도 자동 조절 체크
     _maybe_adjust_difficulty(session, comps)
@@ -327,10 +375,10 @@ def render_quiz_page():
 
     st.markdown(f"**유형:** {subtype_label} | **난이도:** {difficulty_label}")
     st.markdown("---")
-    st.subheader("📖 지문")
+    st.subheader("지문")
     st.markdown(f"> {question.passage}")
     st.markdown("---")
-    st.subheader(f"❓ {question.question_text}")
+    st.subheader(question.question_text)
 
     # 선택지 라디오
     choice_labels = [f"{i+1}. {c}" for i, c in enumerate(question.choices)]
@@ -338,7 +386,7 @@ def render_quiz_page():
 
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("✅ 제출", use_container_width=True, disabled=(selected is None)):
+        if st.button("제출", use_container_width=True, disabled=(selected is None)):
             if selected:
                 answer_num = int(selected[0])  # "1. ..." → 1
                 grader = comps["grader"]
@@ -348,7 +396,7 @@ def render_quiz_page():
                 st.session_state.grade_result = result
                 st.rerun()
     with col2:
-        if st.button("⏭️ 문제 건너뛰기", use_container_width=True):
+        if st.button("문제 건너뛰기", use_container_width=True):
             st.session_state.current_question = None
             st.session_state.grade_result = None
             st.rerun()
@@ -381,17 +429,17 @@ def _render_grade_result():
     question = st.session_state.current_question
 
     if result.is_correct:
-        st.success("✅ 정답입니다!")
+        st.success("정답입니다!")
     else:
-        st.error(f"❌ 오답입니다. 정답은 **{result.correct_answer}번** 입니다. (입력: {result.user_answer}번)")
+        st.error(f"오답입니다. 정답은 {result.correct_answer}번 입니다. (입력: {result.user_answer}번)")
 
     # 문제 + 해설 함께 표시
-    with st.expander("📖 문제 및 해설 보기", expanded=True):
+    with st.expander("문제 및 해설 보기", expanded=True):
         st.markdown("**[지문]**")
         st.markdown(f"> {question.passage}")
         st.markdown(f"**[질문]** {question.question_text}")
         for i, choice in enumerate(question.choices, start=1):
-            prefix = "✅ " if i == result.correct_answer else ("❌ " if i == result.user_answer else "　 ")
+            prefix = "O " if i == result.correct_answer else ("X " if i == result.user_answer else "　 ")
             st.markdown(f"{prefix}{i}. {choice}")
         st.markdown("---")
         st.markdown(f"**해설:** {question.explanation}")
@@ -400,18 +448,18 @@ def _render_grade_result():
     st.subheader("다음 행동을 선택하세요")
     col1, col2, col3 = st.columns(3)
     with col1:
-        if st.button("➡️ 다음 문제", use_container_width=True, key="grade_next"):
+        if st.button("다음 문제", use_container_width=True, key="grade_next"):
             st.session_state.current_question = None
             st.session_state.grade_result = None
             st.rerun()
     with col2:
-        if st.button("📊 오답 분석", use_container_width=True, key="grade_analysis"):
+        if st.button("오답 분석", use_container_width=True, key="grade_analysis"):
             st.session_state.current_question = None
             st.session_state.grade_result = None
             st.session_state.active_tab = "analysis"
             st.rerun()
     with col3:
-        if st.button("📋 학습 리포트", use_container_width=True, key="grade_report"):
+        if st.button("학습 리포트", use_container_width=True, key="grade_report"):
             st.session_state.current_question = None
             st.session_state.grade_result = None
             st.session_state.active_tab = "report"
@@ -464,7 +512,7 @@ def render_analysis_page():
     api_key: str = st.session_state.api_key
     comps = get_components(api_key)
 
-    st.title("📊 실력 분석")
+    st.title("실력 분석")
 
     if not session.grade_results:
         st.warning("분석할 데이터가 없습니다. 문제를 먼저 풀어주세요.")
@@ -530,7 +578,7 @@ def render_analysis_page():
         </div>"""
 
     st.markdown(f"""
-    <div class="dark-card">
+    <div class="card">
         <div class="card-title">유형별 정답률</div>
         <div class="card-subtitle">정답률 60% 미만은 취약 영역으로 분류됩니다</div>
         {rows_html}
@@ -557,14 +605,14 @@ def render_analysis_page():
             </div>"""
 
         st.markdown(f"""
-        <div class="dark-card">
+        <div class="card">
             <div class="card-title">취약한 개념</div>
             <div class="card-subtitle">집중적으로 연습이 필요한 유형입니다</div>
             {weak_rows_html}
         </div>""", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("➡️ 문제 풀러 가기", use_container_width=True, key="analysis_go_quiz"):
+    if st.button("문제 풀러 가기", use_container_width=True, key="analysis_go_quiz"):
         st.session_state.active_tab = "quiz"
         st.rerun()
 
@@ -577,7 +625,7 @@ def render_report_page():
     api_key: str = st.session_state.api_key
     comps = get_components(api_key)
 
-    st.title("📋 학습 리포트")
+    st.title("학습 리포트")
 
     if not session.grade_results:
         st.warning("리포트를 생성할 데이터가 없습니다. 문제를 먼저 풀어주세요.")
@@ -621,7 +669,7 @@ def render_report_page():
     # 예상 점수 vs 목표 점수 진행 바
     progress_pct = min(int(report.predicted_score / report.target_score * 100), 100) if report.target_score > 0 else 0
     st.markdown(f"""
-    <div class="dark-card">
+    <div class="card">
         <div class="card-title">목표 달성 현황</div>
         <div class="card-subtitle">예상 점수 {report.predicted_score:.0f}점 / 목표 {report.target_score}점</div>
         <div class="bar-bg"><div class="bar-fill" style="width:{progress_pct}%"></div></div>
@@ -650,7 +698,7 @@ def render_report_page():
         </div>"""
 
     st.markdown(f"""
-    <div class="dark-card">
+    <div class="card">
         <div class="card-title">유형별 정답률</div>
         {rows_html}
     </div>""", unsafe_allow_html=True)
@@ -658,18 +706,18 @@ def render_report_page():
     # 학습 방향
     if report.study_directions:
         directions_html = "".join(
-            f'<div style="color:#cccccc;font-size:14px;padding:8px 0;border-bottom:1px solid #444">• {d}</div>'
+            f'<div style="color:#555;font-size:14px;padding:8px 0;border-bottom:1px solid #eee">• {d}</div>'
             for d in report.study_directions
         )
         st.markdown(f"""
-        <div class="dark-card">
-            <div class="card-title">📚 학습 방향</div>
+        <div class="card">
+            <div class="card-title">학습 방향</div>
             <div class="card-subtitle">취약 영역 기반 추천 학습 방향입니다</div>
             {directions_html}
         </div>""", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("➡️ 계속 학습하기", use_container_width=True, key="report_go_quiz"):
+    if st.button("계속 학습하기", use_container_width=True, key="report_go_quiz"):
         st.session_state.active_tab = "quiz"
         st.rerun()
 
@@ -693,33 +741,33 @@ def main():
     predicted = session.predicted_score or 0
     difficulty_label = DIFFICULTY_NAMES.get(session.current_difficulty, "")
     st.markdown(f"""
-    <div style="display:flex; gap:16px; align-items:center; padding:8px 0 16px 0; flex-wrap:wrap;">
-        <span style="color:#aaa; font-size:13px;">🎯 목표 <b style="color:#fff">{session.target_score}점</b></span>
-        <span style="color:#aaa; font-size:13px;">📈 예상 <b style="color:#4d9fff">{predicted:.0f}점</b></span>
-        <span style="color:#aaa; font-size:13px;">📚 난이도 <b style="color:#fff">{difficulty_label}</b></span>
-        <span style="color:#aaa; font-size:13px;">✏️ 풀이 <b style="color:#fff">{total}문제</b></span>
+    <div class="status-bar">
+        <div><div class="status-item-label">목표 점수</div><div class="status-item-value">{session.target_score}점</div></div>
+        <div><div class="status-item-label">예상 점수</div><div class="status-item-value mint">{predicted:.0f}점</div></div>
+        <div><div class="status-item-label">난이도</div><div class="status-item-value">{difficulty_label}</div></div>
+        <div><div class="status-item-label">풀이 문제</div><div class="status-item-value">{total}문제</div></div>
     </div>
     """, unsafe_allow_html=True)
 
     # 네비게이션 버튼
     col1, col2, col3, col4 = st.columns([3, 3, 3, 2])
     with col1:
-        if st.button("📝 문제 풀기", use_container_width=True, key="nav_quiz",
+        if st.button("문제 풀기", use_container_width=True, key="nav_quiz",
                      type="primary" if page == "quiz" else "secondary"):
             st.session_state.active_tab = "quiz"
             st.rerun()
     with col2:
-        if st.button("📊 실력 분석", use_container_width=True, key="nav_analysis",
+        if st.button("실력 분석", use_container_width=True, key="nav_analysis",
                      type="primary" if page == "analysis" else "secondary"):
             st.session_state.active_tab = "analysis"
             st.rerun()
     with col3:
-        if st.button("📋 학습 리포트", use_container_width=True, key="nav_report",
+        if st.button("학습 리포트", use_container_width=True, key="nav_report",
                      type="primary" if page == "report" else "secondary"):
             st.session_state.active_tab = "report"
             st.rerun()
     with col4:
-        if st.button("🏠 홈", use_container_width=True, key="nav_home"):
+        if st.button("홈", use_container_width=True, key="nav_home"):
             _clear_session()
 
     st.markdown("---")
