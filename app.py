@@ -110,7 +110,39 @@ body, .stMarkdown, p, div { font-family: 'Inter', 'Apple SD Gothic Neo', sans-se
     height: 8px;
 }
 
-/* 버튼 스타일 오버라이드 */
+/* 제목 텍스트 */
+.page-title-label {
+    font-size: 13px;
+    color: #53cfca;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.page-title-main {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-top: 4px;
+    line-height: 1.2;
+}
+.page-title-sub {
+    font-size: 15px;
+    color: #888;
+    margin-top: 8px;
+}
+.app-title-label {
+    font-size: 12px;
+    color: #53cfca;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.app-title-main {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-top: 2px;
+}
 .stButton > button {
     border-radius: 12px !important;
     font-weight: 600 !important;
@@ -121,7 +153,7 @@ body, .stMarkdown, p, div { font-family: 'Inter', 'Apple SD Gothic Neo', sans-se
     color: white !important;
 }
 
-/* 입력 필드 */
+/* 버튼 스타일 오버라이드 */
 .stNumberInput > div > div > input,
 .stRadio { border-radius: 12px !important; }
 
@@ -198,6 +230,9 @@ body, .stMarkdown, p, div { font-family: 'Inter', 'Apple SD Gothic Neo', sans-se
     div[style*="font-size:32px"] { color: #ffffff !important; }
     div[style*="font-size:22px"] { color: #ffffff !important; }
     div[style*="font-size:12px"][style*="color:#53cfca"] { color: #53cfca !important; }
+    .page-title-main { color: #ffffff !important; }
+    .app-title-main { color: #ffffff !important; }
+    .page-title-sub { color: #9ac8c5 !important; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -275,9 +310,9 @@ def get_api_key() -> str:
 def render_home(api_key: str):
     st.markdown("""
     <div style="padding: 40px 0 8px 0;">
-        <div style="font-size:13px; color:#53cfca; font-weight:600; letter-spacing:1px; text-transform:uppercase;">FLEX AI</div>
-        <div style="font-size:32px; font-weight:800; color:#1a1a1a; margin-top:4px; line-height:1.2; --dark-color:#fff;">학습 에이전트</div>
-        <div style="font-size:15px; color:#888; margin-top:8px;">FLEX 중국어 독해 영역을 AI로 대비하세요</div>
+        <div class="page-title-label">FLEX AI</div>
+        <div class="page-title-main">학습 에이전트</div>
+        <div class="page-title-sub">FLEX 중국어 독해 영역을 AI로 대비하세요</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -850,8 +885,8 @@ def main():
     # 앱 타이틀
     st.markdown("""
     <div style="padding: 24px 0 8px 0;">
-        <div style="font-size:12px; color:#53cfca; font-weight:600; letter-spacing:1px; text-transform:uppercase;">FLEX AI</div>
-        <div style="font-size:22px; font-weight:800; color:#1a1a1a; margin-top:2px;">학습 에이전트</div>
+        <div class="app-title-label">FLEX AI</div>
+        <div class="app-title-main">학습 에이전트</div>
     </div>
     """, unsafe_allow_html=True)
 
